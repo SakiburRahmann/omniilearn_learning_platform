@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { ArrowRight, Mail, Lock, User, ShieldCheck, Loader2 } from "lucide-react";
+import { ArrowRight, Mail, Lock, User, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase-client";
 import { useRouter } from "next/navigation";
@@ -48,7 +48,16 @@ export default function RegisterForm() {
         }
       });
 
-      if (signUpError) throw signUpError;
+      if (signUpError) {
+        if (signUpError.message.includes("already registered") || signUpError.status === 400) {
+          setError("This email is already registered. Please log in instead.");
+        } else {
+          setError(signUpError.message);
+        }
+        setLoading(false);
+        return;
+      }
+      
       if (!data.user) throw new Error("Authentication failed.");
 
       // 2. Sync to Prisma via tRPC
@@ -67,109 +76,100 @@ export default function RegisterForm() {
   };
 
   return (
-    <div className="w-full max-w-md mx-auto">
+    <div className="w-full max-w-md mx-auto py-10">
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
-        className="glass p-10 rounded-[2.5rem] relative overflow-hidden"
+        className="duo-card"
       >
-        <div className="relative z-10">
-          <h2 className="text-3xl font-black mb-2 tracking-tight">Create Account</h2>
-          <p className="text-white/40 mb-8 text-sm">Join the global elite learners today.</p>
+        <h2 className="text-4xl font-black mb-2 tracking-tight text-[#4B4B4B] text-center">Create Profile</h2>
+        <p className="text-[#AFAFAF] mb-10 text-center font-bold">Join the world's most effective learners!</p>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <label className="text-xs font-semibold text-white/50 px-1 uppercase tracking-wider">First Name</label>
-                <div className="relative group">
-                  <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/20 group-focus-within:text-primary transition-colors" />
-                  <input
-                    required
-                    name="firstName"
-                    type="text"
-                    placeholder="Sakibur"
-                    className="w-full bg-white/5 border border-white/5 rounded-2xl py-3.5 pl-11 pr-4 text-sm focus:bg-white/10 focus:border-primary/50 outline-none transition-all"
-                  />
-                </div>
-              </div>
-              <div className="space-y-2">
-                <label className="text-xs font-semibold text-white/50 px-1 uppercase tracking-wider">Last Name</label>
-                <div className="relative group">
-                  <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/20 group-focus-within:text-primary transition-colors" />
-                  <input
-                    required
-                    name="lastName"
-                    type="text"
-                    placeholder="Rahman"
-                    className="w-full bg-white/5 border border-white/5 rounded-2xl py-3.5 pl-11 pr-4 text-sm focus:bg-white/10 focus:border-primary/50 outline-none transition-all"
-                  />
-                </div>
-              </div>
-            </div>
-
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <label className="text-xs font-semibold text-white/50 px-1 uppercase tracking-wider">Email Address</label>
+              <label className="text-sm font-black text-[#4B4B4B] uppercase tracking-wide ml-1">First Name</label>
               <div className="relative group">
-                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/20 group-focus-within:text-primary transition-colors" />
                 <input
                   required
-                  name="email"
-                  type="email"
-                  placeholder="sakibur@example.com"
-                  className="w-full bg-white/5 border border-white/5 rounded-2xl py-3.5 pl-11 pr-4 text-sm focus:bg-white/10 focus:border-primary/50 outline-none transition-all"
+                  name="firstName"
+                  type="text"
+                  placeholder="Sakibur"
+                  className="w-full bg-[#F7F7F7] border-2 border-[#E5E5E5] rounded-2xl py-4 px-5 text-sm font-bold focus:border-secondary outline-none transition-all placeholder:text-[#AFAFAF]"
                 />
               </div>
             </div>
-
             <div className="space-y-2">
-              <label className="text-xs font-semibold text-white/50 px-1 uppercase tracking-wider">Password</label>
+              <label className="text-sm font-black text-[#4B4B4B] uppercase tracking-wide ml-1">Last Name</label>
               <div className="relative group">
-                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/20 group-focus-within:text-primary transition-colors" />
                 <input
                   required
-                  name="password"
-                  type="password"
-                  placeholder="••••••••"
-                  className="w-full bg-white/5 border border-white/5 rounded-2xl py-3.5 pl-11 pr-4 text-sm focus:bg-white/10 focus:border-primary/50 outline-none transition-all"
+                  name="lastName"
+                  type="text"
+                  placeholder="Rahman"
+                  className="w-full bg-[#F7F7F7] border-2 border-[#E5E5E5] rounded-2xl py-4 px-5 text-sm font-bold focus:border-secondary outline-none transition-all placeholder:text-[#AFAFAF]"
                 />
               </div>
             </div>
+          </div>
 
-            {error && (
-              <p className="text-xs font-medium text-red-400 px-1">{error}</p>
-            )}
+          <div className="space-y-2">
+            <label className="text-sm font-black text-[#4B4B4B] uppercase tracking-wide ml-1">Email Address</label>
+            <input
+              required
+              name="email"
+              type="email"
+              placeholder="sakibur@example.com"
+              className="w-full bg-[#F7F7F7] border-2 border-[#E5E5E5] rounded-2xl py-4 px-5 text-sm font-bold focus:border-secondary outline-none transition-all placeholder:text-[#AFAFAF]"
+            />
+          </div>
 
-            <button
-              disabled={loading}
-              className="w-full bg-primary py-4 rounded-2xl font-bold text-lg mt-4 h-14 flex items-center justify-center gap-2 hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-50 disabled:hover:scale-100 shadow-xl shadow-primary/20"
+          <div className="space-y-2">
+            <label className="text-sm font-black text-[#4B4B4B] uppercase tracking-wide ml-1">Password</label>
+            <input
+              required
+              name="password"
+              type="password"
+              placeholder="••••••••"
+              className="w-full bg-[#F7F7F7] border-2 border-[#E5E5E5] rounded-2xl py-4 px-5 text-sm font-bold focus:border-secondary outline-none transition-all placeholder:text-[#AFAFAF]"
+            />
+          </div>
+
+          {error && (
+            <motion.div 
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="bg-[#FFF5F5] border-2 border-[#FF4B4B] rounded-2xl p-4 flex items-center gap-3"
             >
-              {loading ? (
-                <Loader2 className="w-5 h-5 animate-spin" />
-              ) : (
-                <>
-                  Create Account
-                  <ArrowRight className="w-5 h-5" />
-                </>
-              )}
-            </button>
-          </form>
+              <div className="w-2 h-2 rounded-full bg-[#FF4B4B]" />
+              <p className="text-sm font-black text-[#FF4B4B]">{error}</p>
+            </motion.div>
+          )}
 
-          <p className="text-center text-white/30 text-xs mt-8">
-            Already have an account?{" "}
-            <Link href="/login" className="text-primary font-bold hover:underline underline-offset-4">
-              Log In
+          <button
+            disabled={loading}
+            className="duo-button-secondary w-full uppercase h-14"
+          >
+            {loading ? (
+              <Loader2 className="w-6 h-6 animate-spin" />
+            ) : (
+              <>
+                Create Account
+                <ArrowRight className="w-6 h-6" />
+              </>
+            )}
+          </button>
+        </form>
+
+        <div className="mt-10 pt-8 border-t-2 border-[#E5E5E5] text-center">
+          <p className="text-[#AFAFAF] font-bold">
+            Already a learner?{" "}
+            <Link href="/login" className="text-secondary hover:brightness-90 transition-all font-black uppercase">
+              Sign In
             </Link>
           </p>
         </div>
-        
-        {/* Background Highlight */}
-        <div className="absolute top-0 right-0 w-32 h-32 bg-primary/20 blur-[60px] pointer-events-none" />
       </motion.div>
-
-      <div className="mt-8 flex items-center justify-center gap-2 text-white/20">
-        <ShieldCheck className="w-4 h-4" />
-        <span className="text-[10px] font-bold uppercase tracking-widest">Enterprise Grade Security</span>
-      </div>
     </div>
   );
 }

@@ -1,142 +1,139 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { ArrowRight, BookOpen, Trophy, Users, Zap } from "lucide-react";
+import { ArrowRight, Trophy, BookOpen, Users, Star, GraduationCap } from "lucide-react";
 import Link from "next/link";
-import { cn } from "@/lib/utils";
 
 export default function LandingPage() {
   return (
-    <div className="flex flex-col min-h-screen bg-background text-foreground overflow-hidden">
-      {/* Decorative Background Elements */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-[20%] -left-[10%] w-[60%] h-[60%] rounded-full bg-primary/20 blur-[120px]" />
-        <div className="absolute top-[20%] -right-[10%] w-[50%] h-[50%] rounded-full bg-accent/10 blur-[100px]" />
-      </div>
-
+    <div className="flex flex-col min-h-screen bg-white font-nunito">
       {/* Navigation */}
-      <nav className="relative z-50 flex items-center justify-between px-6 py-6 max-w-7xl mx-auto w-full">
-        <div className="flex items-center gap-2 group cursor-pointer">
-          <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center shadow-lg shadow-primary/20 group-hover:scale-110 transition-transform">
-            <Trophy className="text-white w-6 h-6" />
+      <nav className="sticky top-0 z-50 bg-white border-b-2 border-[#E5E5E5] px-6 py-4">
+        <div className="max-w-7xl mx-auto flex items-center justify-between">
+          <div className="flex items-center gap-3 group cursor-pointer">
+            <div className="w-10 h-10 bg-[#58CC02] rounded-xl flex items-center justify-center shadow-[0_4px_0_0_#46A302]">
+              <Trophy className="text-white w-6 h-6" />
+            </div>
+            <span className="text-2xl font-black tracking-tight text-[#58CC02]">OmniiLearn</span>
           </div>
-          <span className="text-2xl font-bold tracking-tight">OmniiLearn</span>
-        </div>
-        
-        <div className="flex items-center gap-4">
-          <Link 
-            href="/login" 
-            className="px-4 py-2 text-sm font-medium hover:text-primary transition-colors"
-          >
-            Login
-          </Link>
-          <Link 
-            href="/register" 
-            className="glass px-5 py-2.5 rounded-full text-sm font-semibold hover:bg-white/10 transition-all active:scale-95"
-          >
-            Get Started
-          </Link>
+          
+          <div className="flex items-center gap-6">
+            <span className="font-black text-[#AFAFAF] uppercase tracking-wide text-xs">Site Language: English</span>
+          </div>
         </div>
       </nav>
 
-      {/* Hero Section */}
-      <main className="relative z-10 flex-grow flex flex-col items-center justify-center px-6 text-center max-w-5xl mx-auto py-20">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-xs font-medium text-white/60 mb-8"
-        >
-          <Zap className="w-3 h-3 text-primary" />
-          <span>The Future of Gamified Education</span>
-        </motion.div>
-
-        <motion.h1
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.1 }}
-          className="text-5xl md:text-7xl lg:text-8xl font-black tracking-tight mb-8 leading-[1.05]"
-        >
-          Learn Anything. <br />
-          <span className="text-gradient">Level Up Every Day.</span>
-        </motion.h1>
-
-        <motion.p
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.2 }}
-          className="text-lg md:text-xl text-white/50 max-w-2xl mb-12 leading-relaxed"
-        >
-          Master new skills through bite-sized, gamified lessons. 
-          Compete in leagues, earn legendary badges, and build your own avatar.
-        </motion.p>
-
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.3 }}
-          className="flex flex-col sm:flex-row gap-4"
-        >
-          <Link
-            href="/register"
-            className="group relative px-8 py-4 bg-primary text-white rounded-2xl font-bold text-lg shadow-2xl shadow-primary/30 hover:scale-105 transition-all active:scale-95 flex items-center gap-2"
-          >
-            Start Your Journey
-            <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-          </Link>
-          <Link
-            href="/courses"
-            className="glass px-8 py-4 rounded-2xl font-bold text-lg hover:bg-white/10 transition-all active:scale-95"
-          >
-            Explore Courses
-          </Link>
-        </motion.div>
-
-        {/* Feature Grid */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 1, delay: 0.5 }}
-          className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-32 w-full text-left"
-        >
-          <div className="glass p-8 rounded-3xl group hover:border-primary/50 transition-colors">
-            <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center mb-6 group-hover:bg-primary/20 transition-colors">
-              <BookOpen className="text-primary w-6 h-6" />
-            </div>
-            <h3 className="text-xl font-bold mb-3">Modular Lessons</h3>
-            <p className="text-white/40 leading-relaxed">Structured learning paths designed for maximum retention and minimum friction.</p>
-          </div>
-          
-          <div className="glass p-8 rounded-3xl group hover:border-accent/50 transition-colors">
-            <div className="w-12 h-12 rounded-2xl bg-accent/10 flex items-center justify-center mb-6 group-hover:bg-accent/20 transition-colors">
-              <Trophy className="text-accent w-6 h-6" />
-            </div>
-            <h3 className="text-xl font-bold mb-3">Global Leagues</h3>
-            <p className="text-white/40 leading-relaxed">Compete with learners worldwide. Climb the ranks from Bronze to Legendary.</p>
+      <main className="flex-grow">
+        {/* Hero Section */}
+        <section className="max-w-7xl mx-auto px-6 py-20 flex flex-col md:flex-row items-center gap-12 text-center md:text-left">
+          <div className="flex-1 flex justify-center md:justify-end order-1 md:order-2">
+            <motion.div
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ type: "spring", stiffness: 100 }}
+              className="relative w-72 h-72 md:w-[400px] md:h-[400px]"
+            >
+              {/* Mascot Placeholder */}
+              <div className="w-full h-full bg-[#58CC02] rounded-[3rem] flex items-center justify-center shadow-[0_12px_0_0_#46A302]">
+                 <Trophy className="text-white w-32 h-32 opacity-20" />
+                 <div className="absolute inset-0 flex items-center justify-center">
+                    <span className="text-white font-black text-4xl transform -rotate-12">Level Up!</span>
+                 </div>
+              </div>
+            </motion.div>
           </div>
 
-          <div className="glass p-8 rounded-3xl group hover:border-secondary/50 transition-colors">
-            <div className="w-12 h-12 rounded-2xl bg-secondary/10 flex items-center justify-center mb-6 group-hover:bg-secondary/20 transition-colors">
-              <Users className="text-secondary w-6 h-6" />
+          <div className="flex-1 order-2 md:order-1 flex flex-col items-center md:items-start">
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-black text-[#4B4B4B] mb-8 leading-tight">
+              The free, fun, and effective way to learn!
+            </h1>
+            
+            <div className="flex flex-col gap-4 w-full max-w-sm">
+              <Link
+                href="/register"
+                className="duo-button-primary w-full uppercase py-4"
+              >
+                Get Started
+              </Link>
+              <Link
+                href="/login"
+                className="duo-button-ghost w-full uppercase py-4"
+              >
+                I already have an account
+              </Link>
             </div>
-            <h3 className="text-xl font-bold mb-3">Social Learning</h3>
-            <p className="text-white/40 leading-relaxed">Share, discuss, and learn together with a worldwide community of peers.</p>
           </div>
-        </motion.div>
+        </section>
+
+        {/* Info Strip */}
+        <section className="border-y-2 border-[#E5E5E5] py-8">
+           <div className="max-w-7xl mx-auto px-6 flex flex-wrap justify-center gap-8 md:gap-20">
+              <div className="flex items-center gap-3">
+                 <div className="w-12 h-12 bg-[#FFC800] rounded-xl flex items-center justify-center shadow-[0_4px_0_0_#D7A700]">
+                    <Star className="text-white w-6 h-6" />
+                 </div>
+                 <span className="font-black text-[#4B4B4B] uppercase tracking-wide">Gamified Courses</span>
+              </div>
+              <div className="flex items-center gap-3">
+                 <div className="w-12 h-12 bg-[#1CB0F6] rounded-xl flex items-center justify-center shadow-[0_4px_0_0_#1899D6]">
+                    <Users className="text-white w-6 h-6" />
+                 </div>
+                 <span className="font-black text-[#4B4B4B] uppercase tracking-wide">Live Leagues</span>
+              </div>
+              <div className="flex items-center gap-3">
+                 <div className="w-12 h-12 bg-[#FF4B4B] rounded-xl flex items-center justify-center shadow-[0_4px_0_0_#D93B3B]">
+                    <GraduationCap className="text-white w-6 h-6" />
+                 </div>
+                 <span className="font-black text-[#4B4B4B] uppercase tracking-wide">AI Learning</span>
+              </div>
+           </div>
+        </section>
+
+        {/* Feature Highlights */}
+        <section className="max-w-7xl mx-auto px-6 py-32 space-y-40">
+           <div className="flex flex-col md:flex-row items-center gap-20">
+              <div className="flex-1 text-center md:text-left">
+                 <h2 className="text-4xl md:text-5xl font-black text-[#58CC02] mb-6">free. fun. effective.</h2>
+                 <p className="text-xl font-bold text-[#777777] leading-relaxed">
+                    Learning with OmniiLearn is fun, and research shows that it works! With quick, bite-sized lessons, you'll earn points and unlock new levels while gaining real-world skills.
+                 </p>
+              </div>
+              <div className="flex-1 duo-card">
+                 <div className="flex items-center gap-4 mb-6">
+                    <div className="w-4 h-4 rounded-full bg-[#58CC02]" />
+                    <div className="h-4 flex-grow bg-[#E5E5E5] rounded-full overflow-hidden">
+                       <div className="h-full bg-[#58CC02] w-3/4" />
+                    </div>
+                 </div>
+                 <div className="grid grid-cols-2 gap-4">
+                    {[1, 2, 3, 4].map((i) => (
+                       <div key={i} className="h-24 bg-[#F7F7F7] rounded-2xl border-2 border-[#E5E5E5]" />
+                    ))}
+                 </div>
+              </div>
+           </div>
+        </section>
       </main>
 
       {/* Footer */}
-      <footer className="relative z-10 border-t border-white/5 py-12 mt-20">
-        <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-8">
-          <div className="flex items-center gap-2">
-            <Trophy className="text-primary w-5 h-5" />
-            <span className="font-bold">OmniiLearn</span>
+      <footer className="bg-[#58CC02] py-20">
+        <div className="max-w-7xl mx-auto px-6 text-center">
+          <h2 className="text-4xl md:text-5xl font-black text-white mb-12">Learn anytime, anywhere.</h2>
+          <div className="flex justify-center gap-6">
+             <Link href="/register" className="duo-button-ghost bg-white text-[#58CC02] shadow-[0_4px_0_0_#D7D7D7] border-none px-12 py-5 uppercase text-xl">
+                Get Started
+             </Link>
           </div>
-          <p className="text-white/20 text-sm">© 2026 OmniiLearn. Built for global excellence.</p>
-          <div className="flex gap-6 text-sm text-white/40">
-            <Link href="#" className="hover:text-white transition-colors">Terms</Link>
-            <Link href="#" className="hover:text-white transition-colors">Privacy</Link>
-            <Link href="#" className="hover:text-white transition-colors">Contact</Link>
+          <div className="mt-20 pt-12 border-t border-white/20 flex flex-col md:flex-row justify-between items-center gap-8 text-white/60 font-black uppercase text-sm">
+             <div className="flex items-center gap-2">
+                <Trophy className="w-5 h-5" />
+                <span>OmniiLearn</span>
+             </div>
+             <div className="flex gap-8">
+                <Link href="#" className="hover:text-white transition-colors">About</Link>
+                <Link href="#" className="hover:text-white transition-colors">Courses</Link>
+                <Link href="#" className="hover:text-white transition-colors">Privacy</Link>
+             </div>
           </div>
         </div>
       </footer>

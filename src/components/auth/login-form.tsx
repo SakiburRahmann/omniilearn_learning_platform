@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { ArrowRight, Mail, Lock, Loader2, Key } from "lucide-react";
+import { ArrowRight, Mail, Lock, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase-client";
 import { useRouter } from "next/navigation";
@@ -41,80 +41,78 @@ export default function LoginForm() {
   };
 
   return (
-    <div className="w-full max-w-md mx-auto">
+    <div className="w-full max-w-md mx-auto py-10">
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
-        className="glass p-10 rounded-[2.5rem] relative overflow-hidden"
+        className="duo-card"
       >
-        <div className="relative z-10">
-          <h2 className="text-3xl font-black mb-2 tracking-tight">Welcome Back</h2>
-          <p className="text-white/40 mb-8 text-sm">Pick up where you left off.</p>
+        <h2 className="text-4xl font-black mb-2 tracking-tight text-[#4B4B4B] text-center">Welcome Back</h2>
+        <p className="text-[#AFAFAF] mb-10 text-center font-bold">Log in to keep leveling up!</p>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-2">
-              <label className="text-xs font-semibold text-white/50 px-1 uppercase tracking-wider">Email Address</label>
-              <div className="relative group">
-                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/20 group-focus-within:text-primary transition-colors" />
-                <input
-                  required
-                  name="email"
-                  type="email"
-                  placeholder="sakibur@example.com"
-                  className="w-full bg-white/5 border border-white/5 rounded-2xl py-3.5 pl-11 pr-4 text-sm focus:bg-white/10 focus:border-primary/50 outline-none transition-all"
-                />
-              </div>
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="space-y-2">
+            <label className="text-sm font-black text-[#4B4B4B] uppercase tracking-wide ml-1">Email Address</label>
+            <input
+              required
+              name="email"
+              type="email"
+              placeholder="sakibur@example.com"
+              className="w-full bg-[#F7F7F7] border-2 border-[#E5E5E5] rounded-2xl py-4 px-5 text-sm font-bold focus:border-secondary outline-none transition-all placeholder:text-[#AFAFAF]"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <div className="flex justify-between items-center px-1">
+              <label className="text-sm font-black text-[#4B4B4B] uppercase tracking-wide">Password</label>
+              <Link href="#" className="text-xs font-black text-secondary hover:brightness-90 uppercase transition-all">
+                Forgot?
+              </Link>
             </div>
+            <input
+              required
+              name="password"
+              type="password"
+              placeholder="••••••••"
+              className="w-full bg-[#F7F7F7] border-2 border-[#E5E5E5] rounded-2xl py-4 px-5 text-sm font-bold focus:border-secondary outline-none transition-all placeholder:text-[#AFAFAF]"
+            />
+          </div>
 
-            <div className="space-y-2">
-              <div className="flex justify-between items-center px-1">
-                <label className="text-xs font-semibold text-white/50 uppercase tracking-wider">Password</label>
-                <Link href="#" className="text-[10px] font-bold text-primary/60 hover:text-primary transition-colors uppercase tracking-widest">
-                  Forgot?
-                </Link>
-              </div>
-              <div className="relative group">
-                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/20 group-focus-within:text-primary transition-colors" />
-                <input
-                  required
-                  name="password"
-                  type="password"
-                  placeholder="••••••••"
-                  className="w-full bg-white/5 border border-white/5 rounded-2xl py-3.5 pl-11 pr-4 text-sm focus:bg-white/10 focus:border-primary/50 outline-none transition-all"
-                />
-              </div>
-            </div>
-
-            <button
-              disabled={loading}
-              className="w-full bg-primary py-4 rounded-2xl font-bold text-lg mt-4 h-14 flex items-center justify-center gap-2 hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-50 disabled:hover:scale-100 shadow-xl shadow-primary/20"
+          {error && (
+            <motion.div 
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="bg-[#FFF5F5] border-2 border-[#FF4B4B] rounded-2xl p-4 flex items-center gap-3"
             >
-              {loading ? (
-                <Loader2 className="w-5 h-5 animate-spin" />
-              ) : (
-                <>
-                  Sign In
-                  <ArrowRight className="w-5 h-5" />
-                </>
-              )}
-            </button>
-          </form>
+              <div className="w-2 h-2 rounded-full bg-[#FF4B4B]" />
+              <p className="text-sm font-black text-[#FF4B4B]">{error}</p>
+            </motion.div>
+          )}
 
-          <p className="text-center text-white/30 text-xs mt-8">
+          <button
+            disabled={loading}
+            className="duo-button-secondary w-full uppercase h-14"
+          >
+            {loading ? (
+              <Loader2 className="w-6 h-6 animate-spin" />
+            ) : (
+              <>
+                Sign In
+                <ArrowRight className="w-6 h-6" />
+              </>
+            )}
+          </button>
+        </form>
+
+        <div className="mt-10 pt-8 border-t-2 border-[#E5E5E5] text-center">
+          <p className="text-[#AFAFAF] font-bold">
             New to OmniiLearn?{" "}
-            <Link href="/register" className="text-primary font-bold hover:underline underline-offset-4">
+            <Link href="/register" className="text-primary hover:brightness-90 transition-all font-black uppercase">
               Join Now
             </Link>
           </p>
         </div>
-        
-        <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-accent/20 blur-[60px] pointer-events-none" />
       </motion.div>
-      
-      <div className="mt-8 flex items-center justify-center gap-2 text-white/20">
-        <Key className="w-4 h-4" />
-        <span className="text-[10px] font-bold uppercase tracking-widest">Secure session management</span>
-      </div>
     </div>
   );
 }

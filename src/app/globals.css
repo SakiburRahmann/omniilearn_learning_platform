@@ -1,39 +1,51 @@
 @import "tailwindcss";
 
 @theme {
-  --color-background: oklch(0.1 0 0);
-  --color-foreground: oklch(0.98 0 0);
+  --color-background: oklch(1 0 0); /* White */
+  --color-foreground: oklch(0.35 0 0); /* Eel #4B4B4B */
   
-  --color-primary: oklch(0.65 0.25 260);
-  --color-secondary: oklch(0.75 0.15 150);
-  --color-accent: oklch(0.85 0.2 330);
-  --color-muted: oklch(0.25 0 0);
+  --color-primary: oklch(0.75 0.22 145); /* Feather Green #58CC02 */
+  --color-secondary: oklch(0.68 0.18 250); /* Dodger Blue #1CB0F6 */
+  --color-accent: oklch(0.85 0.20 85); /* Bumblebee Yellow #FFC800 */
+  --color-destructive: oklch(0.65 0.25 25); /* Cardinal Red #FF4B4B */
+  --color-muted: oklch(0.95 0 0);
   
-  --radius-xl: 1rem;
-  --radius-2xl: 1.5rem;
+  --radius-xl: 1.5rem;
+  --radius-2xl: 2rem;
+  --radius-3xl: 2.5rem;
   
-  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui;
-  --font-mono: var(--font-geist-mono), ui-monospace, SFMono-Regular;
+  --font-nunito: "Nunito", sans-serif;
 }
 
 @layer base {
   * {
-    @apply border-white/10;
+    @apply border-[#E5E5E5];
+    font-family: var(--font-nunito);
   }
   body {
-    @apply bg-background text-foreground selection:bg-primary/30 antialiased;
-    font-feature-settings: "rlig" 1, "calt" 1;
+    @apply bg-background text-foreground selection:bg-primary/20 antialiased;
   }
 }
 
-.glass {
-  @apply bg-white/5 backdrop-blur-xl border border-white/10 shadow-2xl;
-}
+@layer components {
+  /* Duolingo Chunky Buttons */
+  .duo-button-primary {
+    @apply relative px-8 py-3 bg-primary text-white rounded-2xl font-black text-lg transition-all active:translate-y-1 active:shadow-none shadow-[0_4px_0_0_#46A302] flex items-center justify-center gap-2;
+  }
+  
+  .duo-button-secondary {
+    @apply relative px-8 py-3 bg-secondary text-white rounded-2xl font-black text-lg transition-all active:translate-y-1 active:shadow-none shadow-[0_4px_0_0_#1899D6] flex items-center justify-center gap-2;
+  }
+  
+  .duo-button-ghost {
+    @apply relative px-8 py-3 bg-white border-2 border-[#E5E5E5] text-secondary rounded-2xl font-black text-lg transition-all active:translate-y-1 active:shadow-none shadow-[0_4px_0_0_#E5E5E5] hover:bg-[#F7F7F7] flex items-center justify-center gap-2;
+  }
 
-.text-gradient {
-  @apply bg-gradient-to-br from-white via-white to-white/40 bg-clip-text text-transparent;
-}
+  .duo-card {
+    @apply bg-white border-2 border-[#E5E5E5] rounded-[2.5rem] p-10 shadow-[0_4px_0_0_#E5E5E5];
+  }
 
-.primary-gradient {
-  @apply bg-gradient-to-br from-primary via-primary/80 to-accent;
+  .text-gradient {
+    @apply bg-gradient-to-br from-primary to-secondary bg-clip-text text-transparent;
+  }
 }
