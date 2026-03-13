@@ -59,8 +59,9 @@ export default function RegisterForm() {
         supabaseId: data.user.id,
       });
 
-    } catch (err: any) {
-      setError(err.message || "Something went wrong. Please try again.");
+    } catch (err) {
+      const error = err as Error;
+      setError(error.message || "Something went wrong. Please try again.");
       setLoading(false);
     }
   };

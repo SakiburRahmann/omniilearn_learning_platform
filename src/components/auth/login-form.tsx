@@ -32,8 +32,9 @@ export default function LoginForm() {
 
       router.push("/dashboard");
       router.refresh();
-    } catch (err: any) {
-      setError(err.message || "Invalid credentials.");
+    } catch (err) {
+      const error = err as Error;
+      setError(error.message || "Invalid credentials.");
     } finally {
       setLoading(false);
     }
