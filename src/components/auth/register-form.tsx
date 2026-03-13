@@ -15,6 +15,29 @@ export default function RegisterForm() {
   const supabase = createClient();
   
 
+  const registerMutation = api.user.register.useMutation({
+    onSuccess: async (_, variables) => {
+      // 2. After server-side creation, sign in safely
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email: variables.email,
+        password: variables.password,
+      });
+
+      if (signInError) {
+        setError("Account created, but login failed. Please try signing in manually.");
+        setLoading(false);
+        return;
+      }
+
+      router.push("/dashboard");
+      router.refresh();
+    },
+    onError: (err) => {
+      setError(err.message || "Failed to create account. Please try again.");
+      setLoading(false);
+    }
+  });
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
@@ -26,44 +49,13 @@ export default function RegisterForm() {
     const firstName = formData.get("firstName") as string;
     const lastName = formData.get("lastName") as string;
 
-    try {
-      // 1. Sign up with Supabase
-      const { data, error: signUpError } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: {
-            first_name: firstName,
-            last_name: lastName,
-          }
-        }
-      });
-
-      if (signUpError) {
-        if (signUpError.status === 429) {
-          setError("Too many requests. Please wait a few minutes before trying again.");
-        } else if (signUpError.message.includes("already registered")) {
-          setError("This email is already registered. Please log in instead.");
-        } else {
-          setError(signUpError.message);
-        }
-        setLoading(false);
-        return;
-      }
-      
-      if (!data.user) throw new Error("Authentication failed.");
-
-      // FAANG+ Standard: We redirect to dashboard immediately.
-      // The dashboard's "Self-Healing" logic (getProfile) will handle synchronization
-      // in the background once the Supabase session is established.
-      router.push("/dashboard");
-      router.refresh();
-
-    } catch (err) {
-      const error = err as Error;
-      setError(error.message || "Something went wrong. Please try again.");
-      setLoading(false);
-    }
+    // 1. Trigger server-side registration (Bypasses rate-limits/emails)
+    registerMutation.mutate({
+      email,
+      password,
+      firstName,
+      lastName,
+    });
   };
 
   return (
