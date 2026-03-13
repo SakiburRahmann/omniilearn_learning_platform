@@ -3,7 +3,7 @@
 import { motion } from "framer-motion";
 import { ArrowRight, Trophy, BookOpen, Users, Star, GraduationCap } from "lucide-react";
 import Link from "next/link";
-import { ModularAvatar, DEFAULT_AVATAR } from "@/components/avatar/modular-avatar";
+// Removed ModularAvatar
 
 export default function LandingPage() {
   return (
@@ -34,12 +34,41 @@ export default function LandingPage() {
               transition={{ type: "spring", stiffness: 100 }}
               className="relative w-64 h-64 md:w-[400px] md:h-[400px]"
             >
-              <div className="w-full h-full bg-[#E8E8E8] rounded-[3rem] border-4 border-[#E5E5E5] flex items-center justify-center shadow-inner overflow-hidden">
-                <ModularAvatar 
-                  config={DEFAULT_AVATAR}
-                  size={300}
-                  showBackground={false}
-                />
+              <div className="w-full h-full bg-[#E8E8E8] rounded-[3rem] border-4 border-[#E5E5E5] flex items-center justify-center shadow-inner overflow-hidden relative">
+                {/* Background Pattern */}
+                <div className="absolute inset-0 opacity-10" style={{ backgroundImage: "url('data:image/svg+xml,%3Csvg width=\\'20\\' height=\\'20\\' viewBox=\\'0 0 20 20\\' xmlns=\\'http://www.w3.org/2000/svg\\'%3E%3Cg fill=\\'%23000000\\' fill-opacity=\\'1\\' fill-rule=\\'evenodd\\'%3E%3Ccircle cx=\\'3\\' cy=\\'3\\' r=\\'3\\'/%3E%3Ccircle cx=\\'13\\' cy=\\'13\\' r=\\'3\\'/%3E%3C/g%3E%3C/svg%3E')" }} />
+                
+                {/* Animated Central Icon */}
+                <motion.div 
+                  className="relative z-10 w-32 h-32 md:w-48 md:h-48 bg-white rounded-full flex items-center justify-center shadow-[0_8px_0_0_#D7D7D7] border-4 border-[#E5E5E5]"
+                  animate={{ 
+                    y: [0, -15, 0],
+                    rotate: [0, 5, -5, 0]
+                  }}
+                  transition={{ 
+                    duration: 4, 
+                    repeat: Infinity,
+                    ease: "easeInOut"
+                  }}
+                >
+                  <motion.div
+                    animate={{ rotate: 360 }}
+                    transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+                  >
+                    <Star className="w-16 h-16 md:w-24 md:h-24 text-primary fill-primary/20" />
+                  </motion.div>
+                </motion.div>
+                
+                {/* Orbiting Elements */}
+                <motion.div 
+                  className="absolute z-0"
+                  animate={{ rotate: -360 }}
+                  transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
+                  style={{ width: "100%", height: "100%" }}
+                >
+                  <div className="absolute top-[15%] left-[15%] w-6 h-6 bg-secondary rounded-full shadow-md" />
+                  <div className="absolute bottom-[20%] right-[15%] w-8 h-8 bg-accent rounded-xl shadow-md rotate-12" />
+                </motion.div>
               </div>
               <motion.div 
                 animate={{ y: [0, -10, 0] }}

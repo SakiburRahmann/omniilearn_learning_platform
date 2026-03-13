@@ -47,6 +47,12 @@ export default function LoginForm() {
         animate={{ opacity: 1, scale: 1 }}
         className="duo-card p-6 md:p-8"
       >
+        <div className="mb-6 flex justify-center">
+          <Link href="/" className="inline-flex items-center gap-2 px-4 py-2 bg-white border-2 border-[#E5E5E5] rounded-xl hover:bg-[#F7F7F7] transition-all group shadow-sm">
+            <ArrowRight className="w-4 h-4 text-[#AFAFAF] rotate-180 group-hover:-translate-x-1 transition-transform" />
+            <span className="text-xs font-black uppercase text-[#AFAFAF] tracking-wide">Back to Home</span>
+          </Link>
+        </div>
         <h2 className="text-3xl md:text-4xl font-black mb-2 tracking-tight text-[#4B4B4B] text-center">Welcome Back</h2>
         <p className="text-[#AFAFAF] mb-8 md:mb-10 text-center font-bold text-sm md:text-base">Log in to keep leveling up!</p>
 
