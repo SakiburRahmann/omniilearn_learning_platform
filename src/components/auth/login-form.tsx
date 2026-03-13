@@ -58,14 +58,14 @@ export default function LoginForm() {
               name="email"
               type="email"
               placeholder="sakibur@example.com"
-              className="w-full bg-[#F7F7F7] border-2 border-[#E5E5E5] rounded-2xl py-4 px-5 text-sm font-bold focus:border-secondary outline-none transition-all placeholder:text-[#AFAFAF]"
+              className="w-full bg-[#F7F7F7] border-2 border-[#E5E5E5] rounded-2xl py-4 px-5 text-sm font-bold focus:border-primary outline-none transition-all placeholder:text-[#AFAFAF]"
             />
           </div>
 
           <div className="space-y-2">
             <div className="flex justify-between items-center px-1">
               <label className="text-sm font-black text-[#4B4B4B] uppercase tracking-wide">Password</label>
-              <Link href="#" className="text-xs font-black text-secondary hover:brightness-90 uppercase transition-all">
+              <Link href="#" className="text-xs font-black text-primary hover:brightness-90 uppercase transition-all">
                 Forgot?
               </Link>
             </div>
@@ -74,20 +74,18 @@ export default function LoginForm() {
               name="password"
               type="password"
               placeholder="••••••••"
-              className="w-full bg-[#F7F7F7] border-2 border-[#E5E5E5] rounded-2xl py-4 px-5 text-sm font-bold focus:border-secondary outline-none transition-all placeholder:text-[#AFAFAF]"
+              className="w-full bg-[#F7F7F7] border-2 border-[#E5E5E5] rounded-2xl py-4 px-5 text-sm font-bold focus:border-primary outline-none transition-all placeholder:text-[#AFAFAF]"
             />
           </div>
 
-          {error && (
             <motion.div 
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
-              className="bg-[#FFF5F5] border-2 border-[#FF4B4B] rounded-2xl p-4 flex items-center gap-3"
+              className="bg-[#FFF5F5] border-2 border-accent rounded-2xl p-4 flex items-center gap-3"
             >
-              <div className="w-2 h-2 rounded-full bg-[#FF4B4B]" />
-              <p className="text-sm font-black text-[#FF4B4B]">{error}</p>
+              <div className="w-2 h-2 rounded-full bg-accent" />
+              <p className="text-sm font-black text-accent">{error}</p>
             </motion.div>
-          )}
 
           <button
             disabled={loading}
