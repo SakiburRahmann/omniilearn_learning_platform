@@ -38,11 +38,12 @@ export const userRouter = createTRPCRouter({
         });
 
         return { success: true, userId: user.id };
-      } catch (error) {
+      } catch (error: any) {
         console.error("❌ Profile Sync Failed:", error);
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
-          message: "Failed to sync user profile",
+          message: error.message || "Failed to sync user profile",
+          cause: error,
         });
       }
     }),
