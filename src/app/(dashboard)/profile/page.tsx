@@ -7,10 +7,12 @@ import type { AvatarConfig } from "@/components/avatar/modular-avatar";
 import { api } from "@/utils/trpc";
 
 export default function ProfilePage() {
-  const { data: profileData } = api.user.getProfile.useQuery(undefined);
+  // Cast the hook result to any to bypass Next.js deep type instantiation limits on Prisma.JsonValue
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: profileData } = api.user.getProfile.useQuery(undefined) as any;
 
-  // @ts-expect-error - TS gets confused by the depth of AvatarConfig's type
-  const avatarConfig: AvatarConfig = profileData?.studentProfile?.avatarConfig || DEFAULT_AVATAR;
+  // Force-cast to simple Record to kill excessive typescript recursion on Prisma.JsonValue
+  const avatarConfig = profileData?.studentProfile?.avatarConfig as Record<string, unknown> | undefined;
 
   return (
     <div className="space-y-8 pb-12">

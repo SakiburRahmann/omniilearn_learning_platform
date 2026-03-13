@@ -20,10 +20,12 @@ const mobileItems = [
 export function MobileNav({ className }: { className?: string }) {
   const pathname = usePathname();
   
-  const { data: profileData } = api.user.getProfile.useQuery(undefined);
+  // Cast the hook result to any to bypass Next.js deep type instantiation limits on Prisma.JsonValue
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: profileData } = api.user.getProfile.useQuery(undefined) as any;
   
-  // @ts-expect-error - TS gets confused by the depth of AvatarConfig's type
-  const avatarConfig: AvatarConfig = profileData?.studentProfile?.avatarConfig || DEFAULT_AVATAR;
+  // Force-cast to simple Record to kill excessive typescript recursion on Prisma.JsonValue
+  const avatarConfig = profileData?.studentProfile?.avatarConfig as Record<string, unknown> | undefined;
 
   return (
     <div className={cn("fixed bottom-0 left-0 right-0 bg-white border-t-2 border-[#E5E5E5] px-1 py-2 z-50 flex justify-between items-center", className)}>

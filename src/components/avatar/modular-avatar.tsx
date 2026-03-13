@@ -1,43 +1,18 @@
 "use client";
 
-import Avatar, { genConfig } from "react-nice-avatar";
+import { User } from "lucide-react";
+import Image from "next/image";
 
 export interface AvatarConfig {
-  sex: "man" | "woman";
-  faceColor: string;
-  earSize: "small" | "big";
-  hairColor: string;
-  hairStyle: "normal" | "thick" | "mohawk" | "womanLong" | "womanShort";
-  hatColor: string;
-  hatStyle: "none" | "beanie" | "turban";
-  eyeStyle: "circle" | "oval" | "smile";
-  glassesStyle: "none" | "round" | "square";
-  noseStyle: "short" | "long" | "round";
-  mouthStyle: "laugh" | "smile" | "peace";
-  shirtStyle: "hoody" | "short" | "polo";
-  shirtColor: string;
-  bgColor: string;
+  avatarUrl?: string; // The .glb 3D model URL
+  pngUrl?: string;    // The 2D render URL
 }
 
-export const DEFAULT_AVATAR: AvatarConfig = {
-  sex: "man",
-  faceColor: "#F9C9B6",
-  earSize: "small",
-  hairColor: "#000000",
-  hairStyle: "thick",
-  hatColor: "#000000",
-  hatStyle: "none",
-  eyeStyle: "oval",
-  glassesStyle: "none",
-  noseStyle: "short",
-  mouthStyle: "smile",
-  shirtStyle: "hoody",
-  shirtColor: "#9287FF",
-  bgColor: "#E5E5E5",
-};
+export const DEFAULT_AVATAR: AvatarConfig = {};
 
 interface ModularAvatarProps {
-  config: AvatarConfig;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  config?: any;
   size?: number;
   className?: string;
   showBackground?: boolean;
@@ -49,17 +24,45 @@ export function ModularAvatar({
   className,
   showBackground = true,
 }: ModularAvatarProps) {
-  // Use genConfig to merge with default to ensure no missing props break it
-  const finalConfig = genConfig({
-    ...DEFAULT_AVATAR,
-    ...config,
-    isGradient: false,
-    ...(!showBackground && { bgColor: "transparent" })
-  });
+  
+  if (config?.pngUrl) {
+    return (
+      <div 
+        className={className} 
+        style={{ 
+          width: size, 
+          height: size, 
+          backgroundColor: showBackground ? '#E5E5E5' : 'transparent',
+          position: 'relative',
+          overflow: 'hidden'
+        }}
+      >
+        <Image 
+          src={config.pngUrl} 
+          alt="User Avatar" 
+          fill
+          sizes={`${size}px`}
+          className="object-cover"
+          unoptimized // The RPM CDN is already optimized
+        />
+      </div>
+    );
+  }
 
+  // Fallback UI
   return (
-    <div className={className} style={{ width: size, height: size }}>
-      <Avatar className="w-full h-full" shape="rounded" {...finalConfig} />
+    <div 
+      className={className} 
+      style={{ 
+        width: size, 
+        height: size, 
+        backgroundColor: showBackground ? '#E5E5E5' : 'transparent',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center'
+      }}
+    >
+      <User size={size * 0.5} className="text-[#AFAFAF]" />
     </div>
   );
 }

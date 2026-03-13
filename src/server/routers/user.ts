@@ -115,13 +115,25 @@ export const userRouter = createTRPCRouter({
           user.studentProfile.heartsCurrent,
           user.studentProfile.heartsLastRefill
         );
+
+        // Force a shallow copy to sever Prisma's recursive JsonValue typing
+        const safeAvatarConfig = user.studentProfile.avatarConfig ? 
+          JSON.parse(JSON.stringify(user.studentProfile.avatarConfig)) : null;
         
         return {
-          ...user,
+          id: user.id,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          email: user.email,
+          role: user.role,
           studentProfile: {
-            ...user.studentProfile,
+            id: user.studentProfile.id,
+            avatarConfig: safeAvatarConfig, 
+            totalXp: user.studentProfile.totalXp,
+            currentStreak: user.studentProfile.currentStreak,
+            longestStreak: user.studentProfile.longestStreak,
             heartsCurrent: current,
-            nextRegenMs
+            nextRegenMs: nextRegenMs
           }
         };
       }
