@@ -70,7 +70,8 @@ export default function ReadingLessonPage({
     );
   }
 
-  const content = lesson.content as any;
+  // @ts-ignore
+  const lessonData = lesson.content?.content as any;
 
   return (
     <div className="flex flex-col min-h-[calc(100vh-140px)]">
@@ -80,7 +81,7 @@ export default function ReadingLessonPage({
           animate={{ opacity: 1, y: 0 }}
           className="space-y-8"
         >
-          {content?.blocks?.map((block: any, i: number) => {
+          {lessonData?.blocks?.map((block: any, i: number) => {
             if (block.type === 'heading') {
               return (
                 <h1 key={i} className="text-3xl font-black text-[#4B4B4B]">

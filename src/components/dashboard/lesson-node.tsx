@@ -28,7 +28,7 @@ export function LessonNode({
     switch (status) {
       case 'COMPLETED':
         return {
-          button: "bg-[#58CC02] border-[#46A302] hover:bg-[#61E002] shadow-[0_6px_0_0_#46A302]",
+          button: "bg-primary border-primary-dark hover:brightness-110 shadow-[0_6px_0_0_#E6722D]",
           icon: <Check className="w-8 h-8 text-white fill-current" />,
         };
       case 'ACTIVE':

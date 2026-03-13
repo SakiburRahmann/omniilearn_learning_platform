@@ -30,7 +30,7 @@ export default function LessonLayout({
         {/* Progress Bar */}
         <div className="flex-1 h-4 bg-[#E5E5E5] rounded-full overflow-hidden">
           <div 
-            className="h-full bg-[#58CC02] transition-all duration-500 rounded-full" 
+            className="h-full bg-primary transition-all duration-500 rounded-full" 
             style={{ width: "20%" }} 
           />
         </div>

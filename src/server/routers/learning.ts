@@ -9,15 +9,38 @@ export const learningRouter = createTRPCRouter({
       userId: z.string().optional() 
     }))
     .query(async ({ input }) => {
-      // 1. Get the course
+      let courseId = "";
+
+      // 1. If courseSlug not provided, find the user's most recent enrollment
+      if (!input.courseSlug && input.userId) {
+        const lastEnrollment = await db.enrollment.findFirst({
+          where: { userId: input.userId },
+          orderBy: { enrolledAt: 'desc' },
+          select: { courseId: true }
+        });
+        if (lastEnrollment) courseId = lastEnrollment.courseId;
+      }
+
+      // 2. Fetch the course path
       const course = await db.course.findFirst({
-        where: input.courseSlug ? { slug: input.courseSlug } : { status: 'PUBLISHED' },
-        include: {
+        where: input.courseSlug ? { slug: input.courseSlug } : (courseId ? { id: courseId } : { status: 'PUBLISHED' }),
+        select: {
+          id: true,
+          title: true,
           units: {
             orderBy: { position: 'asc' },
-            include: {
+            select: {
+              id: true,
+              title: true,
+              position: true,
               lessons: {
-                orderBy: { position: 'asc' }
+                orderBy: { position: 'asc' },
+                select: {
+                  id: true,
+                  title: true,
+                  type: true,
+                  position: true
+                }
               }
             }
           }

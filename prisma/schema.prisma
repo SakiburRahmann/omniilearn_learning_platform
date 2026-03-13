@@ -211,6 +211,8 @@ model Unit {
   createdAt DateTime @default(now())
 
   lessons   Lesson[]
+
+  @@index([courseId, position])
 }
 
 model Lesson {
@@ -232,6 +234,8 @@ model Lesson {
   quizAttempts     QuizAttempt[]
   unlocks          LessonUnlock[]
   discussionPosts  DiscussionPost[]
+
+  @@index([unitId, position])
 }
 
 enum LessonType {

@@ -21,7 +21,7 @@ export function UnitSection({ title, lessons, onLessonClick }: UnitSectionProps)
   return (
     <section className="w-full max-w-2xl mx-auto mb-12">
       {/* Unit Header */}
-      <div className="bg-[#58CC02] rounded-2xl p-6 mb-8 shadow-[0_4px_0_0_#46A302] text-white">
+      <div className="bg-primary rounded-2xl p-6 mb-8 shadow-[0_4px_0_0_#E6722D] text-white">
         <h2 className="text-xl font-black uppercase tracking-wide opacity-80 mb-1">
           Unit 1
         </h2>
