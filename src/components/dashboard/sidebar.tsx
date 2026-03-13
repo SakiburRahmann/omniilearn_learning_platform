@@ -24,7 +24,7 @@ const navItems = [
   { icon: Settings, label: "Settings", href: "/settings" },
 ];
 
-export function Sidebar() {
+export function Sidebar({ className }: { className?: string }) {
   const pathname = usePathname();
   const router = useRouter();
   const supabase = createClient();
@@ -36,7 +36,7 @@ export function Sidebar() {
   };
 
   return (
-    <aside className="fixed left-0 top-0 h-screen w-64 border-r-2 border-[#E5E5E5] px-4 py-8 flex flex-col bg-white z-50">
+    <aside className={cn("fixed left-0 top-0 h-screen w-64 border-r-2 border-[#E5E5E5] px-4 py-8 flex flex-col bg-white z-50", className)}>
       {/* Brand */}
       <div className="px-4 mb-10 flex items-center gap-3">
         <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center shadow-[0_4px_0_0_#E6722D]">

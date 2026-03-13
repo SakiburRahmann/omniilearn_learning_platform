@@ -76,73 +76,75 @@ export default function RegisterForm() {
   };
 
   return (
-    <div className="w-full max-w-md mx-auto py-10">
+    <div className="w-full max-w-md mx-auto px-4 md:px-0 py-10">
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
-        className="duo-card"
+        className="duo-card p-6 md:p-8"
       >
-        <h2 className="text-4xl font-black mb-2 tracking-tight text-[#4B4B4B] text-center">Create Profile</h2>
-        <p className="text-[#AFAFAF] mb-10 text-center font-bold">Join the world's most effective learners!</p>
+        <h2 className="text-3xl md:text-4xl font-black mb-2 tracking-tight text-[#4B4B4B] text-center">Create Profile</h2>
+        <p className="text-[#AFAFAF] mb-8 md:mb-10 text-center font-bold text-sm md:text-base">Join the world's most effective learners!</p>
 
         <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <label className="text-sm font-black text-[#4B4B4B] uppercase tracking-wide ml-1">First Name</label>
+              <label className="text-[10px] md:text-sm font-black text-[#4B4B4B] uppercase tracking-wide ml-1">First Name</label>
               <div className="relative group">
                 <input
                   required
                   name="firstName"
                   type="text"
                   placeholder="Sakibur"
-                  className="w-full bg-[#F7F7F7] border-2 border-[#E5E5E5] rounded-2xl py-4 px-5 text-sm font-bold focus:border-primary outline-none transition-all placeholder:text-[#AFAFAF]"
+                  className="w-full bg-[#F7F7F7] border-2 border-[#E5E5E5] rounded-2xl py-3 md:py-4 px-5 text-sm font-bold focus:border-primary outline-none transition-all placeholder:text-[#AFAFAF]"
                 />
               </div>
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-black text-[#4B4B4B] uppercase tracking-wide ml-1">Last Name</label>
+              <label className="text-[10px] md:text-sm font-black text-[#4B4B4B] uppercase tracking-wide ml-1">Last Name</label>
               <div className="relative group">
                 <input
                   required
                   name="lastName"
                   type="text"
                   placeholder="Rahman"
-                  className="w-full bg-[#F7F7F7] border-2 border-[#E5E5E5] rounded-2xl py-4 px-5 text-sm font-bold focus:border-primary outline-none transition-all placeholder:text-[#AFAFAF]"
+                  className="w-full bg-[#F7F7F7] border-2 border-[#E5E5E5] rounded-2xl py-3 md:py-4 px-5 text-sm font-bold focus:border-primary outline-none transition-all placeholder:text-[#AFAFAF]"
                 />
               </div>
             </div>
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-black text-[#4B4B4B] uppercase tracking-wide ml-1">Email Address</label>
+            <label className="text-[10px] md:text-sm font-black text-[#4B4B4B] uppercase tracking-wide ml-1">Email Address</label>
             <input
               required
               name="email"
               type="email"
               placeholder="sakibur@example.com"
-              className="w-full bg-[#F7F7F7] border-2 border-[#E5E5E5] rounded-2xl py-4 px-5 text-sm font-bold focus:border-primary outline-none transition-all placeholder:text-[#AFAFAF]"
+              className="w-full bg-[#F7F7F7] border-2 border-[#E5E5E5] rounded-2xl py-3 md:py-4 px-5 text-sm font-bold focus:border-primary outline-none transition-all placeholder:text-[#AFAFAF]"
             />
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-black text-[#4B4B4B] uppercase tracking-wide ml-1">Password</label>
+            <label className="text-[10px] md:text-sm font-black text-[#4B4B4B] uppercase tracking-wide ml-1">Password</label>
             <input
               required
               name="password"
               type="password"
               placeholder="••••••••"
-              className="w-full bg-[#F7F7F7] border-2 border-[#E5E5E5] rounded-2xl py-4 px-5 text-sm font-bold focus:border-primary outline-none transition-all placeholder:text-[#AFAFAF]"
+              className="w-full bg-[#F7F7F7] border-2 border-[#E5E5E5] rounded-2xl py-3 md:py-4 px-5 text-sm font-bold focus:border-primary outline-none transition-all placeholder:text-[#AFAFAF]"
             />
           </div>
 
+          {error && (
             <motion.div 
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
-              className="bg-[#FFF5F5] border-2 border-accent rounded-2xl p-4 flex items-center gap-3"
+              className="bg-[#FFF5F5] border-2 border-[#FF4B4B]/20 rounded-2xl p-4 flex items-center gap-3"
             >
-              <div className="w-2 h-2 rounded-full bg-accent" />
-              <p className="text-sm font-black text-accent">{error}</p>
+              <div className="w-2 h-2 rounded-full bg-[#FF4B4B]" />
+              <p className="text-sm font-black text-[#FF4B4B]">{error}</p>
             </motion.div>
+          )}
 
           <button
             disabled={loading}
