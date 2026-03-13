@@ -31,6 +31,10 @@ export default function ReadingLessonPage({
   const completeMutation = api.learning.completeLesson.useMutation({
     onSuccess: () => {
       setStatus('CORRECT');
+    },
+    onError: (error: any) => {
+      console.error("Mutation failed:", error);
+      alert("Failed to save progress. Please try again.");
     }
   });
 
@@ -40,9 +44,8 @@ export default function ReadingLessonPage({
       return;
     }
 
-    if (userId && lesson) {
+    if (status === 'IDLE' && lesson) {
       completeMutation.mutate({
-        userId,
         lessonId: lesson.id,
         courseId: lesson.courseId,
         xpEarned: 10
@@ -52,8 +55,8 @@ export default function ReadingLessonPage({
 
   if (isLoading) {
     return (
-      <div className="flex flex-col items-center justify-center py-20 gap-4">
-        <div className="w-12 h-12 border-4 border-[#58CC02] border-t-transparent rounded-full animate-spin" />
+      <div className="flex flex-col items-center py-20 gap-4">
+        <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin" />
         <p className="font-bold text-[#AFAFAF]">Loading lesson...</p>
       </div>
     );

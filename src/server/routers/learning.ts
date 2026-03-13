@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { createTRPCRouter, publicProcedure } from "../trpc";
+import { createTRPCRouter, publicProcedure, protectedProcedure } from "../trpc";
 import { db } from "@/lib/prisma";
 
 export const learningRouter = createTRPCRouter({
@@ -54,16 +54,17 @@ export const learningRouter = createTRPCRouter({
       let unlockedLessonIds: string[] = [];
 
       if (input.userId) {
-        const completions = await db.lessonCompletion.findMany({
-          where: { userId: input.userId, courseId: course.id },
-          select: { lessonId: true }
-        });
+        const [completions, unlocks] = await Promise.all([
+          db.lessonCompletion.findMany({
+            where: { userId: input.userId, courseId: course.id },
+            select: { lessonId: true }
+          }),
+          db.lessonUnlock.findMany({
+            where: { userId: input.userId },
+            select: { lessonId: true }
+          })
+        ]);
         completedLessonIds = completions.map(c => c.lessonId);
-
-        const unlocks = await db.lessonUnlock.findMany({
-          where: { userId: input.userId },
-          select: { lessonId: true }
-        });
         unlockedLessonIds = unlocks.map(u => u.lessonId);
       }
 
@@ -117,18 +118,18 @@ export const learningRouter = createTRPCRouter({
       return lesson;
     }),
 
-  completeLesson: publicProcedure
+  completeLesson: protectedProcedure
     .input(z.object({ 
       lessonId: z.string(),
-      userId: z.string(),
       courseId: z.string(),
       xpEarned: z.number().default(10)
     }))
-    .mutation(async ({ input }) => {
+    .mutation(async ({ input, ctx }: { input: any; ctx: any }) => {
+      const userId = ctx.user.id;
       // 1. Create completion
       const completion = await db.lessonCompletion.create({
         data: {
-          userId: input.userId,
+          userId,
           lessonId: input.lessonId,
           courseId: input.courseId,
           xpEarned: input.xpEarned,
@@ -138,7 +139,7 @@ export const learningRouter = createTRPCRouter({
 
       // 2. Grant XP
       await db.studentProfile.update({
-        where: { userId: input.userId },
+        where: { userId },
         data: {
           totalXp: { increment: input.xpEarned }
         }
@@ -146,7 +147,7 @@ export const learningRouter = createTRPCRouter({
 
       await db.xpEvent.create({
         data: {
-          userId: input.userId,
+          userId,
           amount: input.xpEarned,
           reason: 'READING_COMPLETE',
           referenceId: input.lessonId
@@ -172,13 +173,13 @@ export const learningRouter = createTRPCRouter({
           await db.lessonUnlock.upsert({
             where: {
               userId_lessonId: {
-                userId: input.userId,
+                userId,
                 lessonId: nextLesson.id
               }
             },
             update: {},
             create: {
-              userId: input.userId,
+              userId,
               lessonId: nextLesson.id
             }
           });

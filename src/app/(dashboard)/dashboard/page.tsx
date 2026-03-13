@@ -54,7 +54,7 @@ export default function DashboardPage() {
         <div className="lg:col-span-2 space-y-12">
           {isLoading ? (
             <div className="flex flex-col items-center py-20 gap-4">
-              <div className="w-12 h-12 border-4 border-[#58CC02] border-t-transparent rounded-full animate-spin" />
+              <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin" />
               <p className="font-bold text-[#AFAFAF]">Loading your path...</p>
             </div>
           ) : pathData?.units && pathData.units.length > 0 ? (
