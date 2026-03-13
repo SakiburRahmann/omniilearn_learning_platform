@@ -14,15 +14,6 @@ export default function RegisterForm() {
   const router = useRouter();
   const supabase = createClient();
   
-  const syncProfile = api.user.syncProfile.useMutation({
-    onSuccess: () => {
-      router.push("/dashboard");
-      router.refresh();
-    },
-    onError: (err) => {
-      setError(err.message || "Failed to finalize profile. Please contact support.");
-    }
-  });
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -49,7 +40,9 @@ export default function RegisterForm() {
       });
 
       if (signUpError) {
-        if (signUpError.message.includes("already registered") || signUpError.status === 400) {
+        if (signUpError.status === 429) {
+          setError("Too many requests. Please wait a few minutes before trying again.");
+        } else if (signUpError.message.includes("already registered")) {
           setError("This email is already registered. Please log in instead.");
         } else {
           setError(signUpError.message);
@@ -60,10 +53,11 @@ export default function RegisterForm() {
       
       if (!data.user) throw new Error("Authentication failed.");
 
-      // 2. Sync to Prisma via tRPC (Identity handled server-side)
-      await syncProfile.mutateAsync();
-      
+      // FAANG+ Standard: We redirect to dashboard immediately.
+      // The dashboard's "Self-Healing" logic (getProfile) will handle synchronization
+      // in the background once the Supabase session is established.
       router.push("/dashboard");
+      router.refresh();
 
     } catch (err) {
       const error = err as Error;

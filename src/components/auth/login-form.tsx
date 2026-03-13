@@ -28,7 +28,12 @@ export default function LoginForm() {
         password,
       });
 
-      if (signInError) throw signInError;
+      if (signInError) {
+        if (signInError.status === 429) {
+          throw new Error("Too many login attempts. Please wait a minute and try again.");
+        }
+        throw signInError;
+      }
 
       router.push("/dashboard");
       router.refresh();
