@@ -4,12 +4,12 @@
   --color-background: oklch(1 0 0); /* White */
   --color-foreground: oklch(0.35 0 0); /* Eel #4B4B4B */
   
-  --color-primary: #4F46E5; /* Quantum Indigo */
-  --color-primary-dark: #4338CA;
-  --color-secondary: #06B6D4; /* Action Cyan */
-  --color-secondary-dark: #0891B2;
-  --color-accent: #F43F5E; /* Electric Rose */
-  --color-accent-dark: #E11D48;
+  --color-primary: #FF8135; /* Hyper Orange */
+  --color-primary-dark: #E6722D;
+  --color-secondary: #7879FF; /* Sky Indigo */
+  --color-secondary-dark: #6263E1;
+  --color-accent: #5DE2A2; /* Soft Mint */
+  --color-accent-dark: #4BCE8F;
   --color-destructive: oklch(0.65 0.25 25); /* Cardinal Red #FF4B4B */
   --color-muted: oklch(0.95 0 0);
   
