@@ -129,9 +129,9 @@ export const learningRouter = createTRPCRouter({
       const userId = supabaseUser.id;
       
       return await db.$transaction(async (tx) => {
-        // 0. Lazy User Sync (Ensures Prisma User record exists)
-        await tx.user.upsert({
-          where: { id: userId },
+        // 0. Lazy User Sync (Keyed by Email)
+        const user = await tx.user.upsert({
+          where: { email: supabaseUser.email! },
           create: {
             id: userId,
             email: supabaseUser.email!,
@@ -142,14 +142,17 @@ export const learningRouter = createTRPCRouter({
             emailVerified: true,
           },
           update: {
-            email: supabaseUser.email!, // Keep email synced
+            // Ensure ID matches if it was a legacy CUID
+            // Note: Some DBs don't allow updating @id, but if it's already there we're fine
           },
         });
+
+        const dbUserId = user.id;
 
         // 1. Create completion
         const completion = await tx.lessonCompletion.create({
           data: {
-            userId,
+            userId: dbUserId,
             lessonId: input.lessonId,
             courseId: input.courseId,
             xpEarned: input.xpEarned,
@@ -159,9 +162,9 @@ export const learningRouter = createTRPCRouter({
 
         // 2. Grant XP (Ensure profile exists)
         await tx.studentProfile.upsert({
-          where: { userId },
+          where: { userId: dbUserId },
           create: {
-            userId,
+            userId: dbUserId,
             totalXp: input.xpEarned,
             heartsCurrent: 5,
           },
@@ -172,7 +175,7 @@ export const learningRouter = createTRPCRouter({
 
         await tx.xpEvent.create({
           data: {
-            userId,
+            userId: dbUserId,
             amount: input.xpEarned,
             reason: 'READING_COMPLETE',
             referenceId: input.lessonId
@@ -199,13 +202,13 @@ export const learningRouter = createTRPCRouter({
             await tx.lessonUnlock.upsert({
               where: {
                 userId_lessonId: {
-                  userId,
+                  userId: dbUserId,
                   lessonId: nextLesson.id
                 }
               },
               update: {},
               create: {
-                userId,
+                userId: dbUserId,
                 lessonId: nextLesson.id
               }
             });
