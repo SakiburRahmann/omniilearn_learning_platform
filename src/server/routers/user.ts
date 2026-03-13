@@ -3,6 +3,7 @@ import { createTRPCRouter, publicProcedure, protectedProcedure } from "../trpc";
 import { TRPCError } from "@trpc/server";
 import { ensureUserSynced } from "@/lib/user-sync";
 import { supabaseAdmin } from "@/lib/supabase-admin";
+import { calculateCurrentHearts } from "@/lib/gamification";
 
 export const userRouter = createTRPCRouter({
   register: publicProcedure
@@ -26,7 +27,12 @@ export const userRouter = createTRPCRouter({
         });
 
         if (adminError) {
-          console.error("❌ Admin Registration Failed:", adminError);
+          console.error("❌ Admin Registration Failed Detail:", {
+            message: adminError.message,
+            status: adminError.status,
+            name: adminError.name,
+            error: adminError
+          });
           // Handle specific Supabase error codes
           if (adminError.message.includes("already registered") || adminError.status === 422) {
             throw new TRPCError({
@@ -51,7 +57,7 @@ export const userRouter = createTRPCRouter({
         await ensureUserSynced(adminData.user);
 
         return { success: true };
-      } catch (error: any) {
+      } catch (error) {
         if (error instanceof TRPCError) throw error;
         console.error("❌ Registration System Error:", error);
         throw new TRPCError({
@@ -66,11 +72,11 @@ export const userRouter = createTRPCRouter({
       try {
         const user = await ensureUserSynced(ctx.user);
         return { success: true, userId: user.id };
-      } catch (error: any) {
+      } catch (error) {
         console.error("❌ Profile Sync Failed:", error);
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
-          message: error.message || "Failed to sync user profile",
+          message: error instanceof Error ? error.message : "Failed to sync user profile",
         });
       }
     }),
@@ -89,7 +95,7 @@ export const userRouter = createTRPCRouter({
           }
         });
         return { success: true };
-      } catch (error: any) {
+      } catch (error) {
         console.error("❌ Failed to update avatar:", error);
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -102,6 +108,24 @@ export const userRouter = createTRPCRouter({
     .query(async ({ ctx }) => {
       // FAANG+ Standard: All profile fetches are self-healing
       const user = await ensureUserSynced(ctx.user);
+      
+      // Calculate virtual hearts for real-time display
+      if (user.studentProfile) {
+        const { current, nextRegenMs } = calculateCurrentHearts(
+          user.studentProfile.heartsCurrent,
+          user.studentProfile.heartsLastRefill
+        );
+        
+        return {
+          ...user,
+          studentProfile: {
+            ...user.studentProfile,
+            heartsCurrent: current,
+            nextRegenMs
+          }
+        };
+      }
+      
       return user;
     }),
 });

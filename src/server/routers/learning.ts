@@ -1,7 +1,9 @@
 import { z } from "zod";
 import { createTRPCRouter, publicProcedure, protectedProcedure } from "../trpc";
+import { TRPCError } from "@trpc/server";
 import { db } from "@/lib/prisma";
 import { ensureUserSynced } from "@/lib/user-sync";
+import { calculateCurrentHearts, calculateNewStreak } from "@/lib/gamification";
 
 export const learningRouter = createTRPCRouter({
   getLearningPath: publicProcedure
@@ -130,7 +132,31 @@ export const learningRouter = createTRPCRouter({
       const dbUserId = user.id;
       
       return await db.$transaction(async (tx) => {
-        // 1. Create completion
+        // 1. Fetch profile and current hearts
+        const profile = await tx.studentProfile.findUnique({
+          where: { userId: dbUserId },
+          select: { 
+            heartsCurrent: true, 
+            heartsLastRefill: true,
+            currentStreak: true,
+            longestStreak: true,
+            streakLastUpdated: true
+          }
+        });
+
+        if (!profile) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Student profile not found",
+          });
+        }
+
+        const { current, nextRegenMs } = calculateCurrentHearts(profile.heartsCurrent, profile.heartsLastRefill);
+        const heartState = { current, nextRegenMs };
+        
+        const streakState = calculateNewStreak(profile.currentStreak, profile.streakLastUpdated);
+
+        // 4. Create completion record
         const completion = await tx.lessonCompletion.create({
           data: {
             userId: dbUserId,
@@ -141,14 +167,38 @@ export const learningRouter = createTRPCRouter({
           }
         });
 
-        // 2. Grant XP
+        // 5. Update Profile with XP, Streak, and Hearts
+        const updateData: {
+          totalXp?: { increment: number };
+          currentStreak?: number;
+          streakLastUpdated?: Date;
+          longestStreak?: number;
+          heartsCurrent?: number;
+          heartsLastRefill?: Date;
+        } = {
+          totalXp: { increment: input.xpEarned }
+        };
+
+        if (streakState.shouldUpdate) {
+          updateData.currentStreak = streakState.newStreak;
+          updateData.streakLastUpdated = new Date();
+          if (streakState.newStreak > profile.longestStreak) {
+            updateData.longestStreak = streakState.newStreak;
+          }
+        }
+
+        // If hearts have regenerated, sync them to DB
+        if (heartState.current > profile.heartsCurrent) {
+          updateData.heartsCurrent = heartState.current;
+          updateData.heartsLastRefill = new Date();
+        }
+
         await tx.studentProfile.update({
           where: { userId: dbUserId },
-          data: {
-            totalXp: { increment: input.xpEarned }
-          }
+          data: updateData
         });
 
+        // 6. Log XP Event
         await tx.xpEvent.create({
           data: {
             userId: dbUserId,
@@ -158,7 +208,7 @@ export const learningRouter = createTRPCRouter({
           }
         });
 
-        // 3. Unlock next lesson logic
+        // 7. Unlock next lesson logic
         const currentLesson = await tx.lesson.findUnique({
           where: { id: input.lessonId },
           select: { position: true, unitId: true }
@@ -191,7 +241,11 @@ export const learningRouter = createTRPCRouter({
           }
         }
 
-        return completion;
+        return {
+          ...completion,
+          newStreak: streakState.newStreak,
+          xpGained: input.xpEarned
+        };
       });
     }),
 });
