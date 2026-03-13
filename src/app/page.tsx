@@ -3,7 +3,7 @@
 import { motion } from "framer-motion";
 import { ArrowRight, Trophy, BookOpen, Users, Star, GraduationCap } from "lucide-react";
 import Link from "next/link";
-import { ModularAvatar } from "@/components/avatar/modular-avatar";
+import { ModularAvatar, DEFAULT_AVATAR } from "@/components/avatar/modular-avatar";
 
 export default function LandingPage() {
   return (
@@ -34,16 +34,11 @@ export default function LandingPage() {
               transition={{ type: "spring", stiffness: 100 }}
               className="relative w-64 h-64 md:w-[400px] md:h-[400px]"
             >
-              <div className="w-full h-full bg-[#F7F7F7] rounded-[3rem] border-4 border-[#E5E5E5] flex items-center justify-center shadow-inner overflow-hidden">
+              <div className="w-full h-full bg-[#E8E8E8] rounded-[3rem] border-4 border-[#E5E5E5] flex items-center justify-center shadow-inner overflow-hidden">
                 <ModularAvatar 
+                  config={DEFAULT_AVATAR}
                   size={300}
-                  skinColor="#FFDBAC"
-                  hairStyle="hair-spiky"
-                  hairColor="#4B2C20"
-                  shirtColor="#FF8135"
-                  eyeType="eye-standard"
-                  mood="happy"
-                  backgroundColor="transparent"
+                  showBackground={false}
                 />
               </div>
               <motion.div 

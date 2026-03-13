@@ -1,196 +1,392 @@
 "use client";
 
-import { motion } from "framer-motion";
+/**
+ * High-fidelity modular avatar renderer.
+ * Draws layered SVG elements for body, head, eyes, mouth, hair, and accessories.
+ * Designed to replicate Duolingo's flat-illustration avatar style.
+ */
 
-interface AvatarProps {
+export interface AvatarConfig {
+  skinColor: string;
+  bodyShape: string;
+  hairStyle: string;
+  hairColor: string;
+  eyeStyle: string;
+  eyeColor: string;
+  mouthStyle: string;
+  clothingStyle: string;
+  clothingColor: string;
+  accessory: string;
+  accessoryColor: string;
+  background: string;
+}
+
+export const DEFAULT_AVATAR: AvatarConfig = {
+  skinColor: "#E0AC69",
+  bodyShape: "body-standard",
+  hairStyle: "hair-short-sides",
+  hairColor: "#3C2415",
+  eyeStyle: "eyes-standard",
+  eyeColor: "#3C2415",
+  mouthStyle: "mouth-smile",
+  clothingStyle: "cloth-crew",
+  clothingColor: "#4A4A4A",
+  accessory: "acc-none",
+  accessoryColor: "#4A4A4A",
+  background: "#E8E8E8",
+};
+
+interface ModularAvatarProps {
+  config: AvatarConfig;
   size?: number;
-  skinColor?: string;
-  hairColor?: string;
-  hairStyle?: string;
-  shirtColor?: string;
-  clothingStyle?: string;
-  eyeType?: string;
-  eyeColor?: string;
-  mood?: string;
-  accessory?: string;
-  backgroundColor?: string;
   className?: string;
+  showBackground?: boolean;
 }
 
 export function ModularAvatar({
-  size = 200,
-  skinColor = "#FFDBAC",
-  hairColor = "#4B2C20",
-  hairStyle = "hair-short",
-  shirtColor = "#FF8135",
-  clothingStyle = "cloth-tee",
-  eyeType = "eye-standard",
-  eyeColor = "#333333",
-  mood = "happy",
-  accessory = "acc-none",
-  backgroundColor = "#F7F7F7",
-  className
-}: AvatarProps) {
+  config,
+  size = 300,
+  className,
+  showBackground = true,
+}: ModularAvatarProps) {
+  const c = { ...DEFAULT_AVATAR, ...config };
+
   return (
     <div className={className} style={{ width: size, height: size }}>
       <svg
-        viewBox="0 0 200 200"
+        viewBox="0 0 400 400"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
-        className="w-full h-full rounded-[2.5rem]"
-        style={{ backgroundColor }}
+        className="w-full h-full"
       >
-        {/* Shadow */}
-        <ellipse cx="100" cy="185" rx="55" ry="8" fill="#000" fillOpacity="0.08" />
+        {/* Background */}
+        {showBackground && (
+          <rect width="400" height="400" fill={c.background} />
+        )}
 
-        {/* Global Animation Wrapper - Subtle Breathing */}
-        <motion.g
-          animate={{ y: [0, -2, 0] }}
-          transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-        >
-          {/* Body/Clothing */}
-          <g>
-            {/* Standard T-Shirt Base */}
-            <path
-              d="M45 190C45 155 70 145 100 145C130 145 155 155 155 190V200H45V190Z"
-              fill={shirtColor}
-              stroke="#000"
-              strokeWidth="4"
-              strokeLinejoin="round"
-            />
-            {/* Hoodie Detail */}
-            {clothingStyle === "cloth-hoodie" && (
-              <path
-                d="M75 145L100 165L125 145"
-                stroke="#000"
-                strokeWidth="4"
-                strokeLinecap="round"
-                fill="none"
-                opacity="0.3"
-              />
-            )}
-          </g>
+        {/* === BODY / CLOTHING === */}
+        <BodyLayer
+          bodyShape={c.bodyShape}
+          clothingColor={c.clothingColor}
+          skinColor={c.skinColor}
+        />
 
-          {/* Head Shape - Duolingo-style Rounded Square */}
-          <g>
-            <rect
-              x="55"
-              cy="45"
-              width="90"
-              height="100"
-              rx="35"
-              fill={skinColor}
-              stroke="#000"
-              strokeWidth="4"
-            />
-            {/* Nose - Subtle contrast */}
-            <path
-              d="M95 110C95 110 100 115 105 110"
-              stroke="#000"
-              strokeWidth="2.5"
-              strokeLinecap="round"
-              opacity="0.4"
-            />
-          </g>
+        {/* === NECK === */}
+        <rect x="170" y="230" width="60" height="35" fill={c.skinColor} />
 
-          {/* Hair */}
-          <g>
-            {hairStyle === "hair-short" && (
-              <path
-                d="M55 80C55 55 70 45 100 45C130 45 145 55 145 80V90H55V80Z"
-                fill={hairColor}
-                stroke="#000"
-                strokeWidth="4"
-              />
-            )}
-            {hairStyle === "hair-spiky" && (
-              <path
-                d="M55 85C55 55 70 45 100 45C130 45 145 55 145 85H135L125 70L115 85H105L95 70L85 85H55Z"
-                fill={hairColor}
-                stroke="#000"
-                strokeWidth="4"
-              />
-            )}
-            {hairStyle === "hair-bob" && (
-              <path
-                d="M50 80V120H65V80C65 55 80 40 100 40C120 40 135 55 135 80V120H150V80C150 50 130 35 100 35C70 35 50 50 50 80Z"
-                fill={hairColor}
-                stroke="#000"
-                strokeWidth="4"
-              />
-            )}
-          </g>
+        {/* === HEAD === */}
+        <HeadLayer skinColor={c.skinColor} />
 
-          {/* Eyes - Expressive Layers */}
-          <g transform="translate(100, 95)">
-            {/* Left Eye */}
-            <g transform="translate(-22, 0)">
-              {eyeType === "eye-standard" && (
-                <circle r="7" fill={eyeColor} />
-              )}
-              {eyeType === "eye-large" && (
-                <circle r="10" fill={eyeColor} stroke="#000" strokeWidth="2" />
-              )}
-            </g>
-            {/* Right Eye */}
-            <g transform="translate(22, 0)">
-              {eyeType === "eye-standard" && (
-                <circle r="7" fill={eyeColor} />
-              )}
-              {eyeType === "eye-large" && (
-                <circle r="10" fill={eyeColor} stroke="#000" strokeWidth="2" />
-              )}
-              {eyeType === "eye-wink" && (
-                <path d="M-8 2C-8 2 0 -3 8 2" stroke="#000" strokeWidth="4" strokeLinecap="round" />
-              )}
-            </g>
-          </g>
+        {/* === EARS === */}
+        <ellipse cx="120" cy="195" rx="18" ry="22" fill={c.skinColor} />
+        <ellipse cx="280" cy="195" rx="18" ry="22" fill={c.skinColor} />
 
-          {/* Mouth - Responsive Modalities */}
-          <g transform="translate(100, 125)">
-            {mood === "happy" && (
-              <path
-                d="M-12 0C-12 0 0 12 12 0"
-                stroke="#000"
-                strokeWidth="4"
-                strokeLinecap="round"
-              />
-            )}
-            {mood === "neutral" && (
-              <path d="M-10 2H10" stroke="#000" strokeWidth="4" strokeLinecap="round" />
-            )}
-            {mood === "surprised" && (
-              <circle r="7" stroke="#000" strokeWidth="4" />
-            )}
-          </g>
+        {/* === HAIR (back layer behind head is handled by type) === */}
+        <HairLayer
+          hairStyle={c.hairStyle}
+          hairColor={c.hairColor}
+        />
 
-          {/* Accessories */}
-          <g>
-            {accessory === "acc-glasses-round" && (
-              <g transform="translate(100, 95)">
-                <circle cx="-22" cy="0" r="14" stroke="#4B4B4B" strokeWidth="4" fill="none" />
-                <circle cx="22" cy="0" r="14" stroke="#4B4B4B" strokeWidth="4" fill="none" />
-                <path d="M-8 0H8" stroke="#4B4B4B" strokeWidth="4" />
-              </g>
-            )}
-            {accessory === "acc-sunglasses" && (
-              <g transform="translate(100, 95)">
-                <rect x="-38" y="-12" width="32" height="20" rx="4" fill="#333" stroke="#000" strokeWidth="2" />
-                <rect x="6" y="-12" width="32" height="20" rx="4" fill="#333" stroke="#000" strokeWidth="2" />
-                <path d="M-6 -2H6" stroke="#000" strokeWidth="4" />
-              </g>
-            )}
-            {accessory === "acc-beanie" && (
-              <path
-                d="M60 60C60 40 80 30 100 30C120 30 140 40 140 60V80H60V60Z"
-                fill="#FF6B6B"
-                stroke="#000"
-                strokeWidth="4"
-              />
-            )}
-          </g>
-        </motion.g>
+        {/* === EYES === */}
+        <EyesLayer eyeStyle={c.eyeStyle} eyeColor={c.eyeColor} />
+
+        {/* === NOSE === */}
+        <ellipse cx="200" cy="218" rx="8" ry="6" fill={c.skinColor} />
+        <path
+          d="M192 222 C196 228, 204 228, 208 222"
+          stroke="#00000020"
+          strokeWidth="2"
+          strokeLinecap="round"
+          fill="none"
+        />
+
+        {/* === MOUTH === */}
+        <MouthLayer mouthStyle={c.mouthStyle} />
       </svg>
     </div>
   );
+}
+
+/* ──────────────────── BODY SHAPES ──────────────────── */
+
+function BodyLayer({
+  bodyShape,
+  clothingColor,
+  skinColor,
+}: {
+  bodyShape: string;
+  clothingColor: string;
+  skinColor: string;
+}) {
+  switch (bodyShape) {
+    case "body-slim":
+      return (
+        <g>
+          <path
+            d="M155 265 C155 280, 160 320, 140 400 L260 400 C240 320, 245 280, 245 265 Z"
+            fill={clothingColor}
+          />
+          {/* Collar */}
+          <path d="M170 260 L200 285 L230 260" stroke={clothingColor} strokeWidth="8" fill={clothingColor} />
+        </g>
+      );
+    case "body-athletic":
+      return (
+        <g>
+          <path
+            d="M140 265 C130 290, 125 340, 120 400 L280 400 C275 340, 270 290, 260 265 Z"
+            fill={clothingColor}
+          />
+          <path d="M165 260 L200 290 L235 260" stroke={clothingColor} strokeWidth="8" fill={clothingColor} />
+        </g>
+      );
+    case "body-wide":
+      return (
+        <g>
+          <path
+            d="M130 265 C115 300, 100 350, 95 400 L305 400 C300 350, 285 300, 270 265 Z"
+            fill={clothingColor}
+          />
+          <path d="M162 260 L200 292 L238 260" stroke={clothingColor} strokeWidth="8" fill={clothingColor} />
+        </g>
+      );
+    case "body-tall":
+      return (
+        <g>
+          <path
+            d="M150 265 C145 300, 140 350, 135 400 L265 400 C260 350, 255 300, 250 265 Z"
+            fill={clothingColor}
+          />
+          <path d="M168 260 L200 288 L232 260" stroke={clothingColor} strokeWidth="8" fill={clothingColor} />
+        </g>
+      );
+    case "body-stocky":
+      return (
+        <g>
+          <path
+            d="M135 265 C120 290, 108 335, 105 400 L295 400 C292 335, 280 290, 265 265 Z"
+            fill={clothingColor}
+          />
+          <path d="M160 260 L200 292 L240 260" stroke={clothingColor} strokeWidth="8" fill={clothingColor} />
+        </g>
+      );
+    default: /* body-standard */
+      return (
+        <g>
+          <path
+            d="M145 265 C135 295, 128 345, 125 400 L275 400 C272 345, 265 295, 255 265 Z"
+            fill={clothingColor}
+          />
+          <path d="M165 260 L200 290 L235 260" stroke={clothingColor} strokeWidth="8" fill={clothingColor} />
+        </g>
+      );
+  }
+}
+
+/* ──────────────────── HEAD ──────────────────── */
+
+function HeadLayer({ skinColor }: { skinColor: string }) {
+  return (
+    <rect
+      x="128"
+      y="120"
+      width="144"
+      height="140"
+      rx="52"
+      fill={skinColor}
+    />
+  );
+}
+
+/* ──────────────────── HAIR ──────────────────── */
+
+function HairLayer({
+  hairStyle,
+  hairColor,
+}: {
+  hairStyle: string;
+  hairColor: string;
+}) {
+  switch (hairStyle) {
+    case "hair-none":
+      return null;
+
+    case "hair-buzz":
+      return (
+        <path
+          d="M132 175 C132 130, 160 110, 200 110 C240 110, 268 130, 268 175"
+          fill={hairColor}
+        />
+      );
+
+    case "hair-short-sides":
+      return (
+        <g>
+          {/* Top volume */}
+          <path
+            d="M128 175 C128 125, 155 100, 200 100 C245 100, 272 125, 272 175"
+            fill={hairColor}
+          />
+          {/* Side flats */}
+          <rect x="118" y="155" width="18" height="50" rx="9" fill={hairColor} />
+          <rect x="264" y="155" width="18" height="50" rx="9" fill={hairColor} />
+        </g>
+      );
+
+    case "hair-wavy":
+      return (
+        <g>
+          <path
+            d="M118 185 C118 120, 150 90, 200 90 C250 90, 282 120, 282 185"
+            fill={hairColor}
+          />
+          {/* Side hair */}
+          <path
+            d="M118 185 C115 210, 118 240, 130 250 L130 185 Z"
+            fill={hairColor}
+          />
+          <path
+            d="M282 185 C285 210, 282 240, 270 250 L270 185 Z"
+            fill={hairColor}
+          />
+        </g>
+      );
+
+    case "hair-long":
+      return (
+        <g>
+          <path
+            d="M115 185 C115 115, 150 85, 200 85 C250 85, 285 115, 285 185"
+            fill={hairColor}
+          />
+          {/* Long flowing sides */}
+          <path
+            d="M115 185 C110 230, 115 300, 135 340 L135 185 Z"
+            fill={hairColor}
+          />
+          <path
+            d="M285 185 C290 230, 285 300, 265 340 L265 185 Z"
+            fill={hairColor}
+          />
+        </g>
+      );
+
+    case "hair-curly":
+      return (
+        <g>
+          <path
+            d="M120 180 C120 115, 152 88, 200 88 C248 88, 280 115, 280 180"
+            fill={hairColor}
+          />
+          {/* Curly bumps */}
+          <circle cx="135" cy="115" r="18" fill={hairColor} />
+          <circle cx="165" cy="100" r="18" fill={hairColor} />
+          <circle cx="200" cy="92" r="20" fill={hairColor} />
+          <circle cx="235" cy="100" r="18" fill={hairColor} />
+          <circle cx="265" cy="115" r="18" fill={hairColor} />
+        </g>
+      );
+
+    default: /* hair-short-sides */
+      return (
+        <g>
+          <path
+            d="M128 175 C128 125, 155 100, 200 100 C245 100, 272 125, 272 175"
+            fill={hairColor}
+          />
+          <rect x="118" y="155" width="18" height="50" rx="9" fill={hairColor} />
+          <rect x="264" y="155" width="18" height="50" rx="9" fill={hairColor} />
+        </g>
+      );
+  }
+}
+
+/* ──────────────────── EYES ──────────────────── */
+
+function EyesLayer({
+  eyeStyle,
+  eyeColor,
+}: {
+  eyeStyle: string;
+  eyeColor: string;
+}) {
+  switch (eyeStyle) {
+    case "eyes-wide":
+      return (
+        <g>
+          {/* White sclera */}
+          <ellipse cx="172" cy="192" rx="18" ry="20" fill="white" />
+          <ellipse cx="228" cy="192" rx="18" ry="20" fill="white" />
+          {/* Iris */}
+          <circle cx="175" cy="194" r="10" fill={eyeColor} />
+          <circle cx="231" cy="194" r="10" fill={eyeColor} />
+          {/* Highlight */}
+          <circle cx="178" cy="190" r="4" fill="white" />
+          <circle cx="234" cy="190" r="4" fill="white" />
+        </g>
+      );
+
+    case "eyes-small":
+      return (
+        <g>
+          <circle cx="175" cy="194" r="6" fill={eyeColor} />
+          <circle cx="225" cy="194" r="6" fill={eyeColor} />
+        </g>
+      );
+
+    default: /* eyes-standard - Duolingo large eyes */
+      return (
+        <g>
+          {/* White sclera */}
+          <ellipse cx="172" cy="192" rx="22" ry="24" fill="white" />
+          <ellipse cx="228" cy="192" rx="22" ry="24" fill="white" />
+          {/* Iris / Pupil */}
+          <circle cx="176" cy="196" r="12" fill={eyeColor} />
+          <circle cx="232" cy="196" r="12" fill={eyeColor} />
+          {/* Pupil */}
+          <circle cx="178" cy="194" r="6" fill="#000" />
+          <circle cx="234" cy="194" r="6" fill="#000" />
+          {/* Highlight */}
+          <circle cx="182" cy="190" r="4" fill="white" />
+          <circle cx="238" cy="190" r="4" fill="white" />
+        </g>
+      );
+  }
+}
+
+/* ──────────────────── MOUTH ──────────────────── */
+
+function MouthLayer({ mouthStyle }: { mouthStyle: string }) {
+  switch (mouthStyle) {
+    case "mouth-grin":
+      return (
+        <path
+          d="M176 238 C188 255, 212 255, 224 238"
+          stroke="#3C2415"
+          strokeWidth="4"
+          strokeLinecap="round"
+          fill="none"
+        />
+      );
+    case "mouth-open":
+      return (
+        <g>
+          <ellipse cx="200" cy="242" rx="16" ry="12" fill="#8B2500" />
+          <path
+            d="M184 240 C192 248, 208 248, 216 240"
+            fill="#FF6B6B"
+          />
+        </g>
+      );
+    default: /* mouth-smile */
+      return (
+        <path
+          d="M182 240 C192 252, 208 252, 218 240"
+          stroke="#3C2415"
+          strokeWidth="3.5"
+          strokeLinecap="round"
+          fill="none"
+        />
+      );
+  }
 }
