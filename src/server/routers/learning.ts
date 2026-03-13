@@ -125,9 +125,27 @@ export const learningRouter = createTRPCRouter({
       xpEarned: z.number().default(10)
     }))
     .mutation(async ({ input, ctx }: { input: any; ctx: any }) => {
-      const userId = ctx.user.id;
+      const supabaseUser = ctx.user;
+      const userId = supabaseUser.id;
       
       return await db.$transaction(async (tx) => {
+        // 0. Lazy User Sync (Ensures Prisma User record exists)
+        await tx.user.upsert({
+          where: { id: userId },
+          create: {
+            id: userId,
+            email: supabaseUser.email!,
+            firstName: supabaseUser.user_metadata?.first_name || "Student",
+            lastName: supabaseUser.user_metadata?.last_name || "",
+            passwordHash: "SUPABASE_AUTH",
+            status: "VERIFIED",
+            emailVerified: true,
+          },
+          update: {
+            email: supabaseUser.email!, // Keep email synced
+          },
+        });
+
         // 1. Create completion
         const completion = await tx.lessonCompletion.create({
           data: {
