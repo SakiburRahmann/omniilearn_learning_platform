@@ -11,10 +11,10 @@ export default function LandingPage() {
       <nav className="sticky top-0 z-50 bg-white border-b-2 border-[#E5E5E5] px-6 py-4">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3 group cursor-pointer">
-            <div className="w-10 h-10 bg-[#58CC02] rounded-xl flex items-center justify-center shadow-[0_4px_0_0_#46A302]">
+            <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center shadow-[0_4px_0_0_#4338CA]">
               <Trophy className="text-white w-6 h-6" />
             </div>
-            <span className="text-2xl font-black tracking-tight text-[#58CC02]">OmniiLearn</span>
+            <span className="text-2xl font-black tracking-tight text-primary">OmniiLearn</span>
           </div>
           
           <div className="flex items-center gap-6">
@@ -34,10 +34,10 @@ export default function LandingPage() {
               className="relative w-72 h-72 md:w-[400px] md:h-[400px]"
             >
               {/* Mascot Placeholder */}
-              <div className="w-full h-full bg-[#58CC02] rounded-[3rem] flex items-center justify-center shadow-[0_12px_0_0_#46A302]">
+              <div className="w-full h-full bg-primary rounded-[3rem] flex items-center justify-center shadow-[0_12px_0_0_#4338CA]">
                  <Trophy className="text-white w-32 h-32 opacity-20" />
                  <div className="absolute inset-0 flex items-center justify-center">
-                    <span className="text-white font-black text-4xl transform -rotate-12">Level Up!</span>
+                    <span className="text-white font-black text-4xl transform -rotate-12">Think Bigger.</span>
                  </div>
               </div>
             </motion.div>
@@ -45,7 +45,7 @@ export default function LandingPage() {
 
           <div className="flex-1 order-2 md:order-1 flex flex-col items-center md:items-start">
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-black text-[#4B4B4B] mb-8 leading-tight">
-              The free, fun, and effective way to learn!
+              Master new skills with the power of AI.
             </h1>
             
             <div className="flex flex-col gap-4 w-full max-w-sm">
@@ -69,19 +69,19 @@ export default function LandingPage() {
         <section className="border-y-2 border-[#E5E5E5] py-8">
            <div className="max-w-7xl mx-auto px-6 flex flex-wrap justify-center gap-8 md:gap-20">
               <div className="flex items-center gap-3">
-                 <div className="w-12 h-12 bg-[#FFC800] rounded-xl flex items-center justify-center shadow-[0_4px_0_0_#D7A700]">
+                 <div className="w-12 h-12 bg-secondary rounded-xl flex items-center justify-center shadow-[0_4px_0_0_#0891B2]">
                     <Star className="text-white w-6 h-6" />
                  </div>
-                 <span className="font-black text-[#4B4B4B] uppercase tracking-wide">Gamified Courses</span>
+                 <span className="font-black text-[#4B4B4B] uppercase tracking-wide">Premium Courses</span>
               </div>
               <div className="flex items-center gap-3">
-                 <div className="w-12 h-12 bg-[#1CB0F6] rounded-xl flex items-center justify-center shadow-[0_4px_0_0_#1899D6]">
+                 <div className="w-12 h-12 bg-primary rounded-xl flex items-center justify-center shadow-[0_4px_0_0_#4338CA]">
                     <Users className="text-white w-6 h-6" />
                  </div>
-                 <span className="font-black text-[#4B4B4B] uppercase tracking-wide">Live Leagues</span>
+                 <span className="font-black text-[#4B4B4B] uppercase tracking-wide">Global Community</span>
               </div>
               <div className="flex items-center gap-3">
-                 <div className="w-12 h-12 bg-[#FF4B4B] rounded-xl flex items-center justify-center shadow-[0_4px_0_0_#D93B3B]">
+                 <div className="w-12 h-12 bg-accent rounded-xl flex items-center justify-center shadow-[0_4px_0_0_#E11D48]">
                     <GraduationCap className="text-white w-6 h-6" />
                  </div>
                  <span className="font-black text-[#4B4B4B] uppercase tracking-wide">AI Learning</span>
@@ -93,16 +93,16 @@ export default function LandingPage() {
         <section className="max-w-7xl mx-auto px-6 py-32 space-y-40">
            <div className="flex flex-col md:flex-row items-center gap-20">
               <div className="flex-1 text-center md:text-left">
-                 <h2 className="text-4xl md:text-5xl font-black text-[#58CC02] mb-6">free. fun. effective.</h2>
+                 <h2 className="text-4xl md:text-5xl font-black text-primary mb-6">smarter. faster. better.</h2>
                  <p className="text-xl font-bold text-[#777777] leading-relaxed">
-                    Learning with OmniiLearn is fun, and research shows that it works! With quick, bite-sized lessons, you'll earn points and unlock new levels while gaining real-world skills.
+                    OmniiLearn leverages advanced cognitive science to help you learn up to 2x faster. Earn points, compete in global leagues, and unlock your true potential.
                  </p>
               </div>
               <div className="flex-1 duo-card">
                  <div className="flex items-center gap-4 mb-6">
-                    <div className="w-4 h-4 rounded-full bg-[#58CC02]" />
+                    <div className="w-4 h-4 rounded-full bg-primary" />
                     <div className="h-4 flex-grow bg-[#E5E5E5] rounded-full overflow-hidden">
-                       <div className="h-full bg-[#58CC02] w-3/4" />
+                       <div className="h-full bg-primary w-3/4" />
                     </div>
                  </div>
                  <div className="grid grid-cols-2 gap-4">
@@ -116,11 +116,11 @@ export default function LandingPage() {
       </main>
 
       {/* Footer */}
-      <footer className="bg-[#58CC02] py-20">
+      <footer className="bg-primary py-20">
         <div className="max-w-7xl mx-auto px-6 text-center">
           <h2 className="text-4xl md:text-5xl font-black text-white mb-12">Learn anytime, anywhere.</h2>
           <div className="flex justify-center gap-6">
-             <Link href="/register" className="duo-button-ghost bg-white text-[#58CC02] shadow-[0_4px_0_0_#D7D7D7] border-none px-12 py-5 uppercase text-xl">
+             <Link href="/register" className="duo-button-ghost bg-white text-primary shadow-[0_4px_0_0_#D7D7D7] border-none px-12 py-5 uppercase text-xl">
                 Get Started
              </Link>
           </div>
