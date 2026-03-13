@@ -84,6 +84,7 @@ export default function RegisterForm() {
                   <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/20 group-focus-within:text-primary transition-colors" />
                   <input
                     required
+                    name="firstName"
                     type="text"
                     placeholder="Sakibur"
                     className="w-full bg-white/5 border border-white/5 rounded-2xl py-3.5 pl-11 pr-4 text-sm focus:bg-white/10 focus:border-primary/50 outline-none transition-all"
@@ -96,6 +97,7 @@ export default function RegisterForm() {
                   <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/20 group-focus-within:text-primary transition-colors" />
                   <input
                     required
+                    name="lastName"
                     type="text"
                     placeholder="Rahman"
                     className="w-full bg-white/5 border border-white/5 rounded-2xl py-3.5 pl-11 pr-4 text-sm focus:bg-white/10 focus:border-primary/50 outline-none transition-all"
@@ -110,6 +112,7 @@ export default function RegisterForm() {
                 <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/20 group-focus-within:text-primary transition-colors" />
                 <input
                   required
+                  name="email"
                   type="email"
                   placeholder="sakibur@example.com"
                   className="w-full bg-white/5 border border-white/5 rounded-2xl py-3.5 pl-11 pr-4 text-sm focus:bg-white/10 focus:border-primary/50 outline-none transition-all"
@@ -123,6 +126,7 @@ export default function RegisterForm() {
                 <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/20 group-focus-within:text-primary transition-colors" />
                 <input
                   required
+                  name="password"
                   type="password"
                   placeholder="••••••••"
                   className="w-full bg-white/5 border border-white/5 rounded-2xl py-3.5 pl-11 pr-4 text-sm focus:bg-white/10 focus:border-primary/50 outline-none transition-all"
