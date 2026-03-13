@@ -35,7 +35,10 @@ export default function ReadingLessonPage({
     onError: (error: any) => {
       console.error("Mutation failed:", error);
       setStatus('IDLE'); // Revert on failure
-      alert("Failed to save progress. Please try again.");
+      const message = error.data?.zodError 
+        ? "Invalid data submitted" 
+        : (error.message || "Unknown error");
+      alert(`Failed to save progress: ${message}\n(Code: ${error.code})`);
     }
   });
 

@@ -139,10 +139,15 @@ export const learningRouter = createTRPCRouter({
           }
         });
 
-        // 2. Grant XP
-        await tx.studentProfile.update({
+        // 2. Grant XP (Ensure profile exists)
+        await tx.studentProfile.upsert({
           where: { userId },
-          data: {
+          create: {
+            userId,
+            totalXp: input.xpEarned,
+            heartsCurrent: 5,
+          },
+          update: {
             totalXp: { increment: input.xpEarned }
           }
         });
