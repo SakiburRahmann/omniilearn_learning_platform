@@ -7,7 +7,8 @@ const globalForPrisma = globalThis as unknown as {
 };
 
 const pool = new Pool({ connectionString: process.env.DATABASE_URL });
-const adapter = new PrismaPg(pool as any);
+// @ts-ignore
+const adapter = new PrismaPg(pool);
 
 export const db =
   globalForPrisma.prisma ??
