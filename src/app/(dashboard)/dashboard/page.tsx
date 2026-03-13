@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import { Flame, Heart, Star, Target, Zap } from "lucide-react";
+import { AvatarBuilder } from "@/components/dashboard/avatar-builder";
 
 export default function DashboardPage() {
   return (
@@ -14,8 +15,8 @@ export default function DashboardPage() {
             <span className="font-black text-primary">0</span>
           </div>
           <div className="flex items-center gap-2 group cursor-pointer">
-            <Star className="w-6 h-6 text-[#FFC800]" />
-            <span className="font-black text-[#FFC800]">50</span>
+            <Star className="w-6 h-6 text-secondary" />
+            <span className="font-black text-secondary">50</span>
           </div>
           <div className="flex items-center gap-2 group cursor-pointer">
             <Heart className="w-6 h-6 text-[#FF4B4B]" />
@@ -33,6 +34,14 @@ export default function DashboardPage() {
           </header>
 
           <div className="space-y-10">
+            {/* Avatar Builder Section */}
+            <section className="space-y-4">
+               <h3 className="text-xl font-black text-[#4B4B4B] uppercase tracking-wide">Customize Your Character</h3>
+               <div className="duo-card">
+                  <AvatarBuilder />
+               </div>
+            </section>
+
             {/* Active Learning Chapter */}
             <motion.div 
               whileHover={{ y: -5 }}
