@@ -1,7 +1,7 @@
 "use client";
 
+import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
 import { 
   Home, 
   Map, 
@@ -13,7 +13,10 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { createClient } from "@/lib/supabase-client";
-import { useRouter } from "next/navigation";
+import { api } from "@/utils/trpc";
+import { useState, useEffect } from "react";
+import { ModularAvatar, DEFAULT_AVATAR } from "@/components/avatar/modular-avatar";
+import type { AvatarConfig } from "@/components/avatar/modular-avatar";
 
 const navItems = [
   { icon: Home, label: "Learn", href: "/dashboard" },
@@ -28,6 +31,20 @@ export function Sidebar({ className }: { className?: string }) {
   const pathname = usePathname();
   const router = useRouter();
   const supabase = createClient();
+  const [userId, setUserId] = useState<string | null>(null);
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => {
+      if (data?.user) setUserId(data.user.id);
+    });
+  }, [supabase.auth]);
+  
+  const { data: profileData } = api.user.getProfile.useQuery({ userId: userId || "" }, {
+    enabled: !!userId,
+  });
+  
+  // @ts-expect-error - TS gets confused by the depth of AvatarConfig's type
+  const avatarConfig: AvatarConfig = profileData?.studentProfile?.avatarConfig || DEFAULT_AVATAR;
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -60,7 +77,13 @@ export function Sidebar({ className }: { className?: string }) {
                   : "text-[#AFAFAF] hover:bg-[#F7F7F7] border-2 border-transparent"
               )}
             >
-              <item.icon className={cn("w-6 h-6", isActive ? "text-primary" : "text-[#AFAFAF]")} />
+              {item.href === "/profile" ? (
+                <div className={cn("w-8 h-8 rounded-full overflow-hidden border-2", isActive ? "border-primary" : "border-[#E5E5E5]")}>
+                  <ModularAvatar config={avatarConfig} size={32} showBackground={true} />
+                </div>
+              ) : (
+                <item.icon className={cn("w-6 h-6", isActive ? "text-primary" : "text-[#AFAFAF]")} />
+              )}
               <span className="text-sm">{item.label}</span>
             </Link>
           );

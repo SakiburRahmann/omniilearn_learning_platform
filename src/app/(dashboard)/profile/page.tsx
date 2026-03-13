@@ -3,19 +3,39 @@
 import Link from "next/link";
 import { Pencil } from "lucide-react";
 import { ModularAvatar, DEFAULT_AVATAR } from "@/components/avatar/modular-avatar";
+import type { AvatarConfig } from "@/components/avatar/modular-avatar";
+import { api } from "@/utils/trpc";
+import { createClient } from "@/lib/supabase-client";
+import { useState, useEffect } from "react";
 
 export default function ProfilePage() {
+  const supabase = createClient();
+  const [userId, setUserId] = useState<string | null>(null);
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => {
+      if (data?.user) setUserId(data.user.id);
+    });
+  }, [supabase.auth]);
+  
+  const { data: profileData } = api.user.getProfile.useQuery({ userId: userId || "" }, {
+    enabled: !!userId,
+  });
+
+  // @ts-expect-error - TS gets confused by the depth of AvatarConfig's type
+  const avatarConfig: AvatarConfig = profileData?.studentProfile?.avatarConfig || DEFAULT_AVATAR;
+
   return (
     <div className="space-y-8 pb-12">
       {/* Profile Header Card - Duolingo Style */}
       <div className="duo-card overflow-hidden p-0">
         {/* Avatar Banner */}
         <div className="relative bg-[#E8E8E8] h-48 flex items-end justify-center">
-          <div className="w-40 h-40 -mb-8 relative">
+          <div className="w-40 h-40 -mb-8 relative shadow-lg rounded-full bg-white border-4 border-[#E5E5E5] flex items-center justify-center overflow-hidden">
             <ModularAvatar
-              config={DEFAULT_AVATAR}
+              config={avatarConfig}
               size={160}
-              showBackground={false}
+              showBackground={true}
             />
           </div>
 

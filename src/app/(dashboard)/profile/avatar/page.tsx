@@ -1,11 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, Check, Smile, User, Shirt, Palette } from "lucide-react";
 import { ModularAvatar, DEFAULT_AVATAR } from "@/components/avatar/modular-avatar";
 import type { AvatarConfig } from "@/components/avatar/modular-avatar";
 import { cn } from "@/lib/utils";
+import { api } from "@/utils/trpc";
+import { createClient } from "@/lib/supabase-client";
+import { Loader2 } from "lucide-react";
 
 /* ─── Tabs ─── */
 type Tab = "face" | "hair" | "clothes" | "colors";
@@ -65,8 +68,53 @@ const TABS: { id: Tab; icon: typeof User; label: string }[] = [
 
 export default function AvatarEditorPage() {
   const router = useRouter();
+  const supabase = createClient();
+  const [userId, setUserId] = useState<string | null>(null);
+  
   const [config, setConfig] = useState<AvatarConfig>({ ...DEFAULT_AVATAR });
   const [activeTab, setActiveTab] = useState<Tab>("face");
+  const [isSaving, setIsSaving] = useState(false);
+
+  // Fetch Session
+  useState(() => {
+    supabase.auth.getUser().then(({ data }) => {
+      if (data?.user) setUserId(data.user.id);
+    });
+  });
+
+  // Initialize with DB config if available
+  const { data: profileData } = api.user.getProfile.useQuery({ userId: userId || "" }, {
+    enabled: !!userId,
+  });
+
+  useEffect(() => {
+    if (profileData?.studentProfile?.avatarConfig) {
+      setConfig((prev) => ({
+        ...prev,
+        ...(profileData?.studentProfile?.avatarConfig as unknown as AvatarConfig)
+      }));
+    }
+  }, [profileData]);
+
+  const updateAvatar = api.user.updateAvatar.useMutation({
+    onSuccess: () => {
+      router.push("/profile");
+      router.refresh();
+    },
+    onError: (err) => {
+      console.error("Failed to save avatar", err);
+      setIsSaving(false);
+    }
+  });
+
+  const handleSave = () => {
+    if (!userId) return;
+    setIsSaving(true);
+    updateAvatar.mutate({
+      userId,
+      config: config
+    });
+  };
 
   const update = (partial: Partial<AvatarConfig>) => {
     setConfig((prev) => ({ ...prev, ...partial }));
@@ -248,11 +296,21 @@ export default function AvatarEditorPage() {
           {/* Done Button */}
           <div className="p-5 border-t-2 border-[#E5E5E5]">
             <button
-              onClick={() => router.push("/profile")}
-              className="duo-button-secondary w-full py-4 uppercase flex items-center justify-center gap-2 text-base"
+              onClick={handleSave}
+              disabled={isSaving}
+              className="duo-button-secondary w-full py-4 uppercase flex items-center justify-center gap-2 text-base disabled:opacity-50"
             >
-              <Check className="w-5 h-5" />
-              Done
+              {isSaving ? (
+                <>
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                  Saving...
+                </>
+              ) : (
+                <>
+                  <Check className="w-5 h-5" />
+                  Done
+                </>
+              )}
             </button>
           </div>
         </div>
