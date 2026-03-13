@@ -2,20 +2,45 @@
 
 import { motion } from "framer-motion";
 import { Flame, Heart, Star, Target, Zap } from "lucide-react";
+import { api } from "@/utils/trpc";
+import { createClient } from "@/lib/supabase-client";
+import { useState, useEffect } from "react";
+import { UnitSection } from "@/components/dashboard/unit-section";
+import { useRouter } from "next/navigation";
 
 export default function DashboardPage() {
+  const router = useRouter();
+  const supabase = createClient();
+  const [userId, setUserId] = useState<string | null>(null);
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => {
+      if (data?.user) setUserId(data.user.id);
+    });
+  }, [supabase.auth]);
+
+  const { data: pathData, isLoading } = api.learning.getLearningPath.useQuery({ 
+    userId: userId || undefined 
+  }, {
+    enabled: !!userId,
+  });
+
+  const handleLessonClick = (lessonId: string) => {
+    router.push(`/lesson/${lessonId}`);
+  };
+
   return (
-    <div className="space-y-8 pb-12">
+    <div className="space-y-0 pb-12">
       {/* Header Info Bar */}
       <section className="flex items-center justify-between gap-6 px-4 py-4 bg-white border-b-2 border-[#E5E5E5] sticky top-0 z-40">
-        <div className="flex items-center gap-8">
+        <div className="flex items-center gap-8 max-w-4xl mx-auto w-full">
           <div className="flex items-center gap-2 group cursor-pointer">
-            <Flame className="w-6 h-6 text-primary" />
-            <span className="font-black text-primary">0</span>
+            <Flame className="w-6 h-6 text-[#FF9600]" />
+            <span className="font-black text-[#AFAFAF] group-hover:text-[#FF9600] transition-colors">0</span>
           </div>
           <div className="flex items-center gap-2 group cursor-pointer">
-            <Star className="w-6 h-6 text-secondary" />
-            <span className="font-black text-secondary">50</span>
+            <Star className="w-6 h-6 text-[#FFC800]" />
+            <span className="font-black text-[#FFC800]">50</span>
           </div>
           <div className="flex items-center gap-2 group cursor-pointer">
             <Heart className="w-6 h-6 text-[#FF4B4B]" />
@@ -24,82 +49,66 @@ export default function DashboardPage() {
         </div>
       </section>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Main Feed */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-5xl mx-auto px-4 pt-8">
+        {/* Main Learning Path */}
         <div className="lg:col-span-2 space-y-12">
-          <header>
-            <h1 className="text-3xl font-black text-[#4B4B4B] mb-2">Welcome back!</h1>
-            <p className="text-lg font-bold text-[#AFAFAF]">Time to smash your daily goals.</p>
-          </header>
-
-          <div className="space-y-10">
-
-            {/* Active Learning Chapter */}
-            <motion.div 
-              whileHover={{ y: -5 }}
-              className="duo-card relative overflow-hidden group cursor-pointer"
-            >
-              <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:scale-110 transition-transform">
-                 <Zap className="w-24 h-24 text-primary" />
-              </div>
-              <div className="flex flex-col gap-6">
-                 <div className="space-y-1">
-                    <span className="text-sm font-black text-secondary uppercase tracking-widest">Current Unit</span>
-                    <h2 className="text-2xl font-black text-[#4B4B4B]">Social Intelligence 101</h2>
-                 </div>
-                 <div className="h-4 bg-[#E5E5E5] rounded-full overflow-hidden">
-                    <div className="h-full bg-primary w-1/3" />
-                 </div>
-                 <button className="duo-button-primary uppercase py-4">
-                    Continue Learning
-                 </button>
-              </div>
-            </motion.div>
-
-            {/* Daily Quests */}
-            <div className="space-y-4">
-               <h3 className="text-xl font-black text-[#4B4B4B] uppercase tracking-wide">Daily Quests</h3>
-               {[
-                 { label: "Earn 20 XP", progress: 0, total: 20, icon: Target },
-                 { label: "Read 1 Article", progress: 0, total: 1, icon: Target },
-               ].map((quest, i) => (
-                 <div key={i} className="flex items-center gap-6 p-6 border-2 border-[#E5E5E5] rounded-2xl bg-white shadow-[0_4px_0_0_#F0F0F0]">
-                    <div className="w-12 h-12 bg-[#F7F7F7] rounded-xl flex items-center justify-center">
-                       <quest.icon className="text-[#AFAFAF] w-6 h-6" />
-                    </div>
-                    <div className="flex-1 space-y-2">
-                       <div className="flex justify-between items-end">
-                          <span className="font-black text-[#4B4B4B]">{quest.label}</span>
-                          <span className="text-sm font-bold text-[#AFAFAF]">{quest.progress}/{quest.total}</span>
-                       </div>
-                       <div className="h-3 bg-[#E5E5E5] rounded-full overflow-hidden">
-                          <div className="h-full bg-secondary w-0" />
-                       </div>
-                    </div>
-                 </div>
-               ))}
+          {isLoading ? (
+            <div className="flex flex-col items-center py-20 gap-4">
+              <div className="w-12 h-12 border-4 border-[#58CC02] border-t-transparent rounded-full animate-spin" />
+              <p className="font-bold text-[#AFAFAF]">Loading your path...</p>
             </div>
-          </div>
+          ) : pathData?.units ? (
+            pathData.units.map((unit) => (
+              <UnitSection 
+                key={unit.id}
+                title={unit.title}
+                lessons={unit.lessons as any}
+                onLessonClick={handleLessonClick}
+              />
+            ))
+          ) : (
+            <div className="text-center py-20">
+              <h2 className="text-2xl font-black text-[#4B4B4B]">No courses found</h2>
+              <p className="text-[#AFAFAF] font-bold">Try checking back later!</p>
+            </div>
+          )}
         </div>
 
         {/* Sidebar Widgets */}
-        <div className="space-y-8">
+        <div className="space-y-8 h-fit lg:sticky lg:top-24">
            {/* Level Widget */}
-           <div className="duo-card flex flex-col items-center text-center p-10">
-              <div className="w-24 h-24 bg-primary rounded-3xl flex items-center justify-center shadow-[0_8px_0_0_#E6722D] mb-6 mb-8 transform -rotate-3 group cursor-pointer hover:rotate-0 transition-transform">
-                 <span className="text-4xl font-black text-white">1</span>
+           <div className="duo-card flex flex-col items-center text-center p-8 bg-white border-2 border-[#E5E5E5] rounded-2xl shadow-[0_4px_0_0_#E5E5E5]">
+              <div className="w-20 h-20 bg-[#FF9600] rounded-2xl flex items-center justify-center shadow-[0_6px_0_0_#E6722D] mb-6 transform -rotate-3 hover:rotate-0 transition-transform">
+                 <span className="text-3xl font-black text-white">1</span>
               </div>
               <h3 className="text-xl font-black text-[#4B4B4B] mb-2">Novice Learner</h3>
               <p className="text-sm font-bold text-[#AFAFAF] mb-6">Earn 50 more XP to reach Level 2!</p>
-              <div className="w-full h-3 bg-[#E5E5E5] rounded-full overflow-hidden mb-8">
-                 <div className="h-full bg-primary w-1/4" />
+              <div className="w-full h-3 bg-[#E5E5E5] rounded-full overflow-hidden mb-6">
+                 <div className="h-full bg-[#FF9600] w-1/4" />
               </div>
-              <button className="duo-button-ghost w-full uppercase py-3 text-sm">
+              <button className="w-full py-3 rounded-xl border-2 border-[#E5E5E5] text-[#1CB0F6] font-black uppercase tracking-wide hover:bg-[#F7F7F7] transition-colors">
                  View Badges
               </button>
+           </div>
+           
+           {/* Daily Quests Mini */}
+           <div className="duo-card p-6 bg-white border-2 border-[#E5E5E5] rounded-2xl shadow-[0_4px_0_0_#E5E5E5]">
+              <h3 className="text-lg font-black text-[#4B4B4B] mb-4 uppercase tracking-wide">Daily Quests</h3>
+              <div className="space-y-4">
+                 <div className="flex items-center gap-3">
+                    <Target className="w-5 h-5 text-[#FF4B4B]" />
+                    <div className="flex-1">
+                       <p className="text-sm font-black text-[#4B4B4B]">Earn 10 XP</p>
+                       <div className="h-2 bg-[#E5E5E5] rounded-full mt-1">
+                          <div className="h-full bg-[#FFC800] w-0" />
+                       </div>
+                    </div>
+                 </div>
+              </div>
            </div>
         </div>
       </div>
     </div>
   );
 }
+

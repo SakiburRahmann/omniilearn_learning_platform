@@ -1,0 +1,167 @@
+import { z } from "zod";
+import { createTRPCRouter, publicProcedure } from "../trpc";
+import { db } from "@/lib/prisma";
+
+export const learningRouter = createTRPCRouter({
+  getLearningPath: publicProcedure
+    .input(z.object({ 
+      courseSlug: z.string().optional(),
+      userId: z.string().optional() 
+    }))
+    .query(async ({ input }) => {
+      // 1. Get the course
+      const course = await db.course.findFirst({
+        where: input.courseSlug ? { slug: input.courseSlug } : { status: 'PUBLISHED' },
+        include: {
+          units: {
+            orderBy: { position: 'asc' },
+            include: {
+              lessons: {
+                orderBy: { position: 'asc' }
+              }
+            }
+          }
+        }
+      });
+
+      if (!course) return null;
+
+      // 2. Get user's progress if userId provided
+      let completedLessonIds: string[] = [];
+      let unlockedLessonIds: string[] = [];
+
+      if (input.userId) {
+        const completions = await db.lessonCompletion.findMany({
+          where: { userId: input.userId, courseId: course.id },
+          select: { lessonId: true }
+        });
+        completedLessonIds = completions.map(c => c.lessonId);
+
+        const unlocks = await db.lessonUnlock.findMany({
+          where: { userId: input.userId },
+          select: { lessonId: true }
+        });
+        unlockedLessonIds = unlocks.map(u => u.lessonId);
+      }
+
+      // 3. Transform data for the UI
+      // For MVP: If first time, the first lesson is 'active', rest 'locked'
+      const units = course.units.map((unit, unitIndex) => {
+        return {
+          ...unit,
+          lessons: unit.lessons.map((lesson, lessonIndex) => {
+            let status: 'COMPLETED' | 'ACTIVE' | 'LOCKED' = 'LOCKED';
+            
+            const isCompleted = completedLessonIds.includes(lesson.id);
+            const isUnlocked = unlockedLessonIds.includes(lesson.id);
+
+            if (isCompleted) {
+              status = 'COMPLETED';
+            } else if (isUnlocked || (unitIndex === 0 && lessonIndex === 0)) {
+              // The very first lesson is always active if nothing else is
+              status = 'ACTIVE';
+            } else {
+              status = 'LOCKED';
+            }
+
+            return {
+              id: lesson.id,
+              title: lesson.title,
+              type: lesson.type,
+              status,
+              position: lesson.position
+            };
+          })
+        };
+      });
+
+      return {
+        courseTitle: course.title,
+        units
+      };
+    }),
+
+  getLessonContent: publicProcedure
+    .input(z.object({ lessonId: z.string() }))
+    .query(async ({ input }) => {
+      const lesson = await db.lesson.findUnique({
+        where: { id: input.lessonId },
+        include: {
+          content: true,
+          unit: true
+        }
+      });
+      return lesson;
+    }),
+
+  completeLesson: publicProcedure
+    .input(z.object({ 
+      lessonId: z.string(),
+      userId: z.string(),
+      courseId: z.string(),
+      xpEarned: z.number().default(10)
+    }))
+    .mutation(async ({ input }) => {
+      // 1. Create completion
+      const completion = await db.lessonCompletion.create({
+        data: {
+          userId: input.userId,
+          lessonId: input.lessonId,
+          courseId: input.courseId,
+          xpEarned: input.xpEarned,
+          timeSpentSeconds: 60, // Mock for now
+        }
+      });
+
+      // 2. Grant XP
+      await db.studentProfile.update({
+        where: { userId: input.userId },
+        data: {
+          totalXp: { increment: input.xpEarned }
+        }
+      });
+
+      await db.xpEvent.create({
+        data: {
+          userId: input.userId,
+          amount: input.xpEarned,
+          reason: 'READING_COMPLETE',
+          referenceId: input.lessonId
+        }
+      });
+
+      // 3. Unlock next lesson logic
+      const currentLesson = await db.lesson.findUnique({
+        where: { id: input.lessonId },
+        select: { position: true, unitId: true }
+      });
+
+      if (currentLesson) {
+        const nextLesson = await db.lesson.findFirst({
+          where: {
+            unitId: currentLesson.unitId,
+            position: { gt: currentLesson.position }
+          },
+          orderBy: { position: 'asc' }
+        });
+
+        if (nextLesson) {
+          await db.lessonUnlock.upsert({
+            where: {
+              userId_lessonId: {
+                userId: input.userId,
+                lessonId: nextLesson.id
+              }
+            },
+            update: {},
+            create: {
+              userId: input.userId,
+              lessonId: nextLesson.id
+            }
+          });
+        }
+      }
+
+      return completion;
+    }),
+});
