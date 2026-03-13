@@ -5,22 +5,9 @@ import { Pencil } from "lucide-react";
 import { ModularAvatar, DEFAULT_AVATAR } from "@/components/avatar/modular-avatar";
 import type { AvatarConfig } from "@/components/avatar/modular-avatar";
 import { api } from "@/utils/trpc";
-import { createClient } from "@/lib/supabase-client";
-import { useState, useEffect } from "react";
 
 export default function ProfilePage() {
-  const supabase = createClient();
-  const [userId, setUserId] = useState<string | null>(null);
-
-  useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => {
-      if (data?.user) setUserId(data.user.id);
-    });
-  }, [supabase.auth]);
-  
-  const { data: profileData } = api.user.getProfile.useQuery({ userId: userId || "" }, {
-    enabled: !!userId,
-  });
+  const { data: profileData } = api.user.getProfile.useQuery(undefined);
 
   // @ts-expect-error - TS gets confused by the depth of AvatarConfig's type
   const avatarConfig: AvatarConfig = profileData?.studentProfile?.avatarConfig || DEFAULT_AVATAR;
@@ -51,7 +38,7 @@ export default function ProfilePage() {
 
         {/* User Info */}
         <div className="px-8 pt-12 pb-8 text-center">
-          <h1 className="text-2xl font-black text-[#4B4B4B]">Sakibur Rahman</h1>
+          <h1 className="text-2xl font-black text-[#4B4B4B]">{profileData?.firstName} {profileData?.lastName}</h1>
           <p className="text-sm font-bold text-[#AFAFAF] mt-1">Joined March 2026</p>
         </div>
       </div>
@@ -59,8 +46,8 @@ export default function ProfilePage() {
       {/* Stats Grid */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {[
-          { label: "Day Streak", value: "0", icon: "🔥" },
-          { label: "Total XP", value: "50", icon: "⚡" },
+          { label: "Day Streak", value: profileData?.studentProfile?.currentStreak || "0", icon: "🔥" },
+          { label: "Total XP", value: profileData?.studentProfile?.totalXp || "0", icon: "⚡" },
           { label: "Current League", value: "Bronze", icon: "🛡️" },
           { label: "Top Finishes", value: "0", icon: "🏆" },
         ].map((stat) => (

@@ -7,7 +7,6 @@ import { ModularAvatar, DEFAULT_AVATAR } from "@/components/avatar/modular-avata
 import type { AvatarConfig } from "@/components/avatar/modular-avatar";
 import { cn } from "@/lib/utils";
 import { api } from "@/utils/trpc";
-import { createClient } from "@/lib/supabase-client";
 import { Loader2 } from "lucide-react";
 
 /* ─── Tabs ─── */
@@ -68,24 +67,13 @@ const TABS: { id: Tab; icon: typeof User; label: string }[] = [
 
 export default function AvatarEditorPage() {
   const router = useRouter();
-  const supabase = createClient();
-  const [userId, setUserId] = useState<string | null>(null);
   
   const [config, setConfig] = useState<AvatarConfig>({ ...DEFAULT_AVATAR });
   const [activeTab, setActiveTab] = useState<Tab>("face");
   const [isSaving, setIsSaving] = useState(false);
 
-  // Fetch Session
-  useState(() => {
-    supabase.auth.getUser().then(({ data }) => {
-      if (data?.user) setUserId(data.user.id);
-    });
-  });
-
   // Initialize with DB config if available
-  const { data: profileData } = api.user.getProfile.useQuery({ userId: userId || "" }, {
-    enabled: !!userId,
-  });
+  const { data: profileData } = api.user.getProfile.useQuery(undefined);
 
   useEffect(() => {
     if (profileData?.studentProfile?.avatarConfig) {
@@ -108,10 +96,8 @@ export default function AvatarEditorPage() {
   });
 
   const handleSave = () => {
-    if (!userId) return;
     setIsSaving(true);
     updateAvatar.mutate({
-      userId,
       config: config
     });
   };

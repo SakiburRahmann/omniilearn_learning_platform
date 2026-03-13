@@ -14,7 +14,6 @@ import {
 import { cn } from "@/lib/utils";
 import { createClient } from "@/lib/supabase-client";
 import { api } from "@/utils/trpc";
-import { useState, useEffect } from "react";
 import { ModularAvatar, DEFAULT_AVATAR } from "@/components/avatar/modular-avatar";
 import type { AvatarConfig } from "@/components/avatar/modular-avatar";
 
@@ -31,17 +30,8 @@ export function Sidebar({ className }: { className?: string }) {
   const pathname = usePathname();
   const router = useRouter();
   const supabase = createClient();
-  const [userId, setUserId] = useState<string | null>(null);
-
-  useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => {
-      if (data?.user) setUserId(data.user.id);
-    });
-  }, [supabase.auth]);
   
-  const { data: profileData } = api.user.getProfile.useQuery({ userId: userId || "" }, {
-    enabled: !!userId,
-  });
+  const { data: profileData } = api.user.getProfile.useQuery(undefined);
   
   // @ts-expect-error - TS gets confused by the depth of AvatarConfig's type
   const avatarConfig: AvatarConfig = profileData?.studentProfile?.avatarConfig || DEFAULT_AVATAR;

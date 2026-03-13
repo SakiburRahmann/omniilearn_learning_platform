@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { createTRPCRouter, publicProcedure, protectedProcedure } from "../trpc";
 import { db } from "@/lib/prisma";
+import { ensureUserSynced } from "@/lib/user-sync";
 
 export const learningRouter = createTRPCRouter({
   getLearningPath: publicProcedure
@@ -124,31 +125,11 @@ export const learningRouter = createTRPCRouter({
       courseId: z.string(),
       xpEarned: z.number().default(10)
     }))
-    .mutation(async ({ input, ctx }: { input: any; ctx: any }) => {
-      const supabaseUser = ctx.user;
-      const userId = supabaseUser.id;
+    .mutation(async ({ input, ctx }) => {
+      const user = await ensureUserSynced(ctx.user);
+      const dbUserId = user.id;
       
       return await db.$transaction(async (tx) => {
-        // 0. Lazy User Sync (Keyed by Email)
-        const user = await tx.user.upsert({
-          where: { email: supabaseUser.email! },
-          create: {
-            id: userId,
-            email: supabaseUser.email!,
-            firstName: supabaseUser.user_metadata?.first_name || "Student",
-            lastName: supabaseUser.user_metadata?.last_name || "",
-            passwordHash: "SUPABASE_AUTH",
-            status: "VERIFIED",
-            emailVerified: true,
-          },
-          update: {
-            // Ensure ID matches if it was a legacy CUID
-            // Note: Some DBs don't allow updating @id, but if it's already there we're fine
-          },
-        });
-
-        const dbUserId = user.id;
-
         // 1. Create completion
         const completion = await tx.lessonCompletion.create({
           data: {
@@ -160,15 +141,10 @@ export const learningRouter = createTRPCRouter({
           }
         });
 
-        // 2. Grant XP (Ensure profile exists)
-        await tx.studentProfile.upsert({
+        // 2. Grant XP
+        await tx.studentProfile.update({
           where: { userId: dbUserId },
-          create: {
-            userId: dbUserId,
-            totalXp: input.xpEarned,
-            heartsCurrent: 5,
-          },
-          update: {
+          data: {
             totalXp: { increment: input.xpEarned }
           }
         });

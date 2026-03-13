@@ -60,13 +60,10 @@ export default function RegisterForm() {
       
       if (!data.user) throw new Error("Authentication failed.");
 
-      // 2. Sync to Prisma via tRPC
-      await syncProfile.mutateAsync({
-        email,
-        firstName,
-        lastName,
-        supabaseId: data.user.id,
-      });
+      // 2. Sync to Prisma via tRPC (Identity handled server-side)
+      await syncProfile.mutateAsync();
+      
+      router.push("/dashboard");
 
     } catch (err) {
       const error = err as Error;

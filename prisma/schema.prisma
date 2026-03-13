@@ -279,6 +279,7 @@ model Enrollment {
   isCompleted Boolean   @default(false)
 
   @@unique([userId, courseId])
+  @@index([userId])
 }
 
 model LessonCompletion {
@@ -297,6 +298,7 @@ model LessonCompletion {
   completedAt        DateTime @default(now())
 
   @@index([userId, courseId])
+  @@index([lessonId])
 }
 
 model QuizAttempt {
@@ -352,6 +354,7 @@ model XpEvent {
   createdAt   DateTime @default(now())
 
   @@index([userId])
+  @@index([createdAt])
 }
 
 enum XpReason {

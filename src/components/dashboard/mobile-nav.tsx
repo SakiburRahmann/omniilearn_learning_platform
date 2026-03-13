@@ -5,8 +5,6 @@ import { usePathname } from "next/navigation";
 import { Home, Map, Trophy, User, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { api } from "@/utils/trpc";
-import { createClient } from "@/lib/supabase-client";
-import { useState, useEffect } from "react";
 import { ModularAvatar, DEFAULT_AVATAR } from "@/components/avatar/modular-avatar";
 import type { AvatarConfig } from "@/components/avatar/modular-avatar";
 
@@ -20,18 +18,8 @@ const mobileItems = [
 
 export function MobileNav({ className }: { className?: string }) {
   const pathname = usePathname();
-  const supabase = createClient();
-  const [userId, setUserId] = useState<string | null>(null);
-
-  useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => {
-      if (data?.user) setUserId(data.user.id);
-    });
-  }, [supabase.auth]);
   
-  const { data: profileData } = api.user.getProfile.useQuery({ userId: userId || "" }, {
-    enabled: !!userId,
-  });
+  const { data: profileData } = api.user.getProfile.useQuery(undefined);
   
   // @ts-expect-error - TS gets confused by the depth of AvatarConfig's type
   const avatarConfig: AvatarConfig = profileData?.studentProfile?.avatarConfig || DEFAULT_AVATAR;
