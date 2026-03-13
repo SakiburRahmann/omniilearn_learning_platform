@@ -30,10 +30,11 @@ export default function ReadingLessonPage({
 
   const completeMutation = api.learning.completeLesson.useMutation({
     onSuccess: () => {
-      setStatus('CORRECT');
+      // Success is already handled optimistically
     },
     onError: (error: any) => {
       console.error("Mutation failed:", error);
+      setStatus('IDLE'); // Revert on failure
       alert("Failed to save progress. Please try again.");
     }
   });
@@ -44,7 +45,10 @@ export default function ReadingLessonPage({
       return;
     }
 
-    if (status === 'IDLE' && lesson) {
+    if (status === 'IDLE' && lesson && !completeMutation.isPending) {
+      // Optimistic transition
+      setStatus('CORRECT');
+      
       completeMutation.mutate({
         lessonId: lesson.id,
         courseId: lesson.courseId,

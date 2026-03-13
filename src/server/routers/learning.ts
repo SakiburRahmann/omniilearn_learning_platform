@@ -126,66 +126,70 @@ export const learningRouter = createTRPCRouter({
     }))
     .mutation(async ({ input, ctx }: { input: any; ctx: any }) => {
       const userId = ctx.user.id;
-      // 1. Create completion
-      const completion = await db.lessonCompletion.create({
-        data: {
-          userId,
-          lessonId: input.lessonId,
-          courseId: input.courseId,
-          xpEarned: input.xpEarned,
-          timeSpentSeconds: 60, // Mock for now
-        }
-      });
-
-      // 2. Grant XP
-      await db.studentProfile.update({
-        where: { userId },
-        data: {
-          totalXp: { increment: input.xpEarned }
-        }
-      });
-
-      await db.xpEvent.create({
-        data: {
-          userId,
-          amount: input.xpEarned,
-          reason: 'READING_COMPLETE',
-          referenceId: input.lessonId
-        }
-      });
-
-      // 3. Unlock next lesson logic
-      const currentLesson = await db.lesson.findUnique({
-        where: { id: input.lessonId },
-        select: { position: true, unitId: true }
-      });
-
-      if (currentLesson) {
-        const nextLesson = await db.lesson.findFirst({
-          where: {
-            unitId: currentLesson.unitId,
-            position: { gt: currentLesson.position }
-          },
-          orderBy: { position: 'asc' }
+      
+      return await db.$transaction(async (tx) => {
+        // 1. Create completion
+        const completion = await tx.lessonCompletion.create({
+          data: {
+            userId,
+            lessonId: input.lessonId,
+            courseId: input.courseId,
+            xpEarned: input.xpEarned,
+            timeSpentSeconds: 60,
+          }
         });
 
-        if (nextLesson) {
-          await db.lessonUnlock.upsert({
+        // 2. Grant XP
+        await tx.studentProfile.update({
+          where: { userId },
+          data: {
+            totalXp: { increment: input.xpEarned }
+          }
+        });
+
+        await tx.xpEvent.create({
+          data: {
+            userId,
+            amount: input.xpEarned,
+            reason: 'READING_COMPLETE',
+            referenceId: input.lessonId
+          }
+        });
+
+        // 3. Unlock next lesson logic
+        const currentLesson = await tx.lesson.findUnique({
+          where: { id: input.lessonId },
+          select: { position: true, unitId: true }
+        });
+
+        if (currentLesson) {
+          const nextLesson = await tx.lesson.findFirst({
             where: {
-              userId_lessonId: {
+              unitId: currentLesson.unitId,
+              position: { gt: currentLesson.position }
+            },
+            orderBy: { position: 'asc' },
+            select: { id: true }
+          });
+
+          if (nextLesson) {
+            await tx.lessonUnlock.upsert({
+              where: {
+                userId_lessonId: {
+                  userId,
+                  lessonId: nextLesson.id
+                }
+              },
+              update: {},
+              create: {
                 userId,
                 lessonId: nextLesson.id
               }
-            },
-            update: {},
-            create: {
-              userId,
-              lessonId: nextLesson.id
-            }
-          });
+            });
+          }
         }
-      }
 
-      return completion;
+        return completion;
+      });
     }),
 });

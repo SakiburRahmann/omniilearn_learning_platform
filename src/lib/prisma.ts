@@ -8,7 +8,12 @@ const globalForPrisma = globalThis as unknown as {
   adapter: PrismaPg | undefined;
 };
 
-const pool = globalForPrisma.pool ?? new Pool({ connectionString: process.env.DATABASE_URL });
+const pool = globalForPrisma.pool ?? new Pool({ 
+  connectionString: process.env.DATABASE_URL,
+  max: 10,
+  idleTimeoutMillis: 30000,
+  connectionTimeoutMillis: 2000,
+});
 if (!globalForPrisma.pool) globalForPrisma.pool = pool;
 
 // @ts-ignore
