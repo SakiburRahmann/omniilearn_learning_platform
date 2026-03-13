@@ -1,9 +1,13 @@
 "use client";
 
 /**
- * High-fidelity modular avatar renderer — Duolingo-grade.
- * "Expression" is a preset that controls eyes, eyebrows, nose, and mouth together.
- * Eye color is independent and applied to the iris of every expression.
+ * Duolingo-grade modular avatar renderer.
+ * Carefully crafted SVG geometry matching Duolingo's exact proportions:
+ * - Large egg-shaped eyes with oval iris + highlight
+ * - Teardrop nose (darker than skin)
+ * - Clean curved mouth
+ * - Rounded-square head
+ * - Subtle ears
  */
 
 /* ══════════════════════════════════════════════════════
@@ -57,6 +61,9 @@ export function ModularAvatar({
 }: ModularAvatarProps) {
   const c = { ...DEFAULT_AVATAR, ...config };
 
+  /* Derive a slightly darker shade for the nose from skin color */
+  const noseColor = darkenHex(c.skinColor, 0.22);
+
   return (
     <div className={className} style={{ width: size, height: size }}>
       <svg
@@ -67,27 +74,44 @@ export function ModularAvatar({
       >
         {showBackground && <rect width="400" height="400" fill={c.background} />}
 
-        {/* Body / Clothing */}
+        {/* === BODY / CLOTHING === */}
         <BodyLayer bodyShape={c.bodyShape} clothingColor={c.clothingColor} />
 
-        {/* Neck */}
-        <rect x="172" y="232" width="56" height="32" fill={c.skinColor} />
+        {/* === NECK === */}
+        <rect x="175" y="262" width="50" height="28" fill={c.skinColor} />
 
-        {/* Head — rounded square like Duolingo */}
-        <rect x="130" y="118" width="140" height="138" rx="36" fill={c.skinColor} />
+        {/* === HEAD — Rounded square (Duolingo signature shape) === */}
+        <rect x="115" y="100" width="170" height="172" rx="52" fill={c.skinColor} />
 
-        {/* Ears — small rounded */}
-        <ellipse cx="126" cy="195" rx="14" ry="18" fill={c.skinColor} />
-        <ellipse cx="274" cy="195" rx="14" ry="18" fill={c.skinColor} />
+        {/* === EARS — Small, subtle rounded bumps === */}
+        <ellipse cx="115" cy="200" rx="12" ry="16" fill={c.skinColor} />
+        <ellipse cx="285" cy="200" rx="12" ry="16" fill={c.skinColor} />
 
-        {/* Hair */}
+        {/* === HAIR === */}
         <HairLayer hairStyle={c.hairStyle} hairColor={c.hairColor} />
 
-        {/* Face (expression preset = eyes + eyebrows + nose + mouth) */}
-        <ExpressionLayer expression={c.expression} eyeColor={c.eyeColor} skinColor={c.skinColor} />
+        {/* === FACE (expression preset) === */}
+        <ExpressionLayer
+          expression={c.expression}
+          eyeColor={c.eyeColor}
+          skinColor={c.skinColor}
+          noseColor={noseColor}
+        />
       </svg>
     </div>
   );
+}
+
+/* ══════════════════════════════════════════════════════
+   UTILITY: darken a hex color
+   ══════════════════════════════════════════════════════ */
+
+function darkenHex(hex: string, amount: number): string {
+  const num = parseInt(hex.replace("#", ""), 16);
+  const r = Math.max(0, ((num >> 16) & 0xff) - Math.round(255 * amount));
+  const g = Math.max(0, ((num >> 8) & 0xff) - Math.round(255 * amount));
+  const b = Math.max(0, (num & 0xff) - Math.round(255 * amount));
+  return `#${((r << 16) | (g << 8) | b).toString(16).padStart(6, "0")}`;
 }
 
 /* ══════════════════════════════════════════════════════
@@ -95,23 +119,22 @@ export function ModularAvatar({
    ══════════════════════════════════════════════════════ */
 
 function BodyLayer({ bodyShape, clothingColor }: { bodyShape: string; clothingColor: string }) {
-  const collar = (x1: number, x2: number) => (
-    <path d={`M${x1} 260 L200 290 L${400 - x1} 260`} stroke={clothingColor} strokeWidth="8" fill={clothingColor} />
-  );
+  /* Collar V-shape */
+  const collar = <path d="M172 284 L200 310 L228 284" fill={clothingColor} />;
 
   switch (bodyShape) {
     case "body-slim":
-      return <g><path d="M155 265 C155 280,160 320,140 400 L260 400 C240 320,245 280,245 265 Z" fill={clothingColor} />{collar(170, 230)}</g>;
+      return <g><path d="M158 284 C155 310,150 360,142 400 L258 400 C250 360,245 310,242 284 Z" fill={clothingColor} />{collar}</g>;
     case "body-athletic":
-      return <g><path d="M140 265 C130 290,125 340,120 400 L280 400 C275 340,270 290,260 265 Z" fill={clothingColor} />{collar(165, 235)}</g>;
+      return <g><path d="M145 284 C132 310,120 360,112 400 L288 400 C280 360,268 310,255 284 Z" fill={clothingColor} />{collar}</g>;
     case "body-wide":
-      return <g><path d="M130 265 C115 300,100 350,95 400 L305 400 C300 350,285 300,270 265 Z" fill={clothingColor} />{collar(162, 238)}</g>;
+      return <g><path d="M132 284 C115 318,98 365,90 400 L310 400 C302 365,285 318,268 284 Z" fill={clothingColor} />{collar}</g>;
     case "body-tall":
-      return <g><path d="M150 265 C145 300,140 350,135 400 L265 400 C260 350,255 300,250 265 Z" fill={clothingColor} />{collar(168, 232)}</g>;
+      return <g><path d="M152 284 C148 315,142 360,138 400 L262 400 C258 360,252 315,248 284 Z" fill={clothingColor} />{collar}</g>;
     case "body-stocky":
-      return <g><path d="M135 265 C120 290,108 335,105 400 L295 400 C292 335,280 290,265 265 Z" fill={clothingColor} />{collar(160, 240)}</g>;
-    default:
-      return <g><path d="M145 265 C135 295,128 345,125 400 L275 400 C272 345,265 295,255 265 Z" fill={clothingColor} />{collar(165, 235)}</g>;
+      return <g><path d="M138 284 C122 310,108 350,100 400 L300 400 C292 350,278 310,262 284 Z" fill={clothingColor} />{collar}</g>;
+    default: /* body-standard */
+      return <g><path d="M148 284 C138 312,128 355,122 400 L278 400 C272 355,262 312,252 284 Z" fill={clothingColor} />{collar}</g>;
   }
 }
 
@@ -124,48 +147,50 @@ function HairLayer({ hairStyle, hairColor }: { hairStyle: string; hairColor: str
     case "hair-none":
       return null;
     case "hair-buzz":
-      return <path d="M134 175 C134 130,160 110,200 110 C240 110,266 130,266 175" fill={hairColor} />;
+      return <path d="M120 160 C120 115, 150 90, 200 90 C250 90, 280 115, 280 160" fill={hairColor} />;
     case "hair-short-sides":
       return (
         <g>
-          <path d="M130 175 C130 125,157 100,200 100 C243 100,270 125,270 175" fill={hairColor} />
-          <rect x="118" y="155" width="16" height="48" rx="8" fill={hairColor} />
-          <rect x="266" y="155" width="16" height="48" rx="8" fill={hairColor} />
+          {/* Hair cap */}
+          <path d="M118 170 C118 112, 152 88, 200 88 C248 88, 282 112, 282 170" fill={hairColor} />
+          {/* Side burns */}
+          <rect x="105" y="162" width="16" height="42" rx="8" fill={hairColor} />
+          <rect x="279" y="162" width="16" height="42" rx="8" fill={hairColor} />
         </g>
       );
     case "hair-wavy":
       return (
         <g>
-          <path d="M120 185 C120 120,152 90,200 90 C248 90,280 120,280 185" fill={hairColor} />
-          <path d="M120 185 C117 210,120 240,132 250 L132 185 Z" fill={hairColor} />
-          <path d="M280 185 C283 210,280 240,268 250 L268 185 Z" fill={hairColor} />
+          <path d="M112 178 C112 108, 148 78, 200 78 C252 78, 288 108, 288 178" fill={hairColor} />
+          <path d="M112 178 C108 208, 112 242, 126 252 L126 178 Z" fill={hairColor} />
+          <path d="M288 178 C292 208, 288 242, 274 252 L274 178 Z" fill={hairColor} />
         </g>
       );
     case "hair-long":
       return (
         <g>
-          <path d="M117 185 C117 115,152 85,200 85 C248 85,283 115,283 185" fill={hairColor} />
-          <path d="M117 185 C112 230,117 300,137 340 L137 185 Z" fill={hairColor} />
-          <path d="M283 185 C288 230,283 300,263 340 L263 185 Z" fill={hairColor} />
+          <path d="M108 178 C108 105, 148 72, 200 72 C252 72, 292 105, 292 178" fill={hairColor} />
+          <path d="M108 178 C104 228, 108 305, 132 345 L132 178 Z" fill={hairColor} />
+          <path d="M292 178 C296 228, 292 305, 268 345 L268 178 Z" fill={hairColor} />
         </g>
       );
     case "hair-curly":
       return (
         <g>
-          <path d="M122 180 C122 115,154 88,200 88 C246 88,278 115,278 180" fill={hairColor} />
-          <circle cx="137" cy="115" r="17" fill={hairColor} />
-          <circle cx="167" cy="100" r="17" fill={hairColor} />
-          <circle cx="200" cy="92" r="19" fill={hairColor} />
-          <circle cx="233" cy="100" r="17" fill={hairColor} />
-          <circle cx="263" cy="115" r="17" fill={hairColor} />
+          <path d="M114 175 C114 108, 150 80, 200 80 C250 80, 286 108, 286 175" fill={hairColor} />
+          <circle cx="130" cy="108" r="18" fill={hairColor} />
+          <circle cx="162" cy="92" r="18" fill={hairColor} />
+          <circle cx="200" cy="82" r="20" fill={hairColor} />
+          <circle cx="238" cy="92" r="18" fill={hairColor} />
+          <circle cx="270" cy="108" r="18" fill={hairColor} />
         </g>
       );
     default:
       return (
         <g>
-          <path d="M130 175 C130 125,157 100,200 100 C243 100,270 125,270 175" fill={hairColor} />
-          <rect x="118" y="155" width="16" height="48" rx="8" fill={hairColor} />
-          <rect x="266" y="155" width="16" height="48" rx="8" fill={hairColor} />
+          <path d="M118 170 C118 112, 152 88, 200 88 C248 88, 282 112, 282 170" fill={hairColor} />
+          <rect x="105" y="162" width="16" height="42" rx="8" fill={hairColor} />
+          <rect x="279" y="162" width="16" height="42" rx="8" fill={hairColor} />
         </g>
       );
   }
@@ -173,193 +198,172 @@ function HairLayer({ hairStyle, hairColor }: { hairStyle: string; hairColor: str
 
 /* ══════════════════════════════════════════════════════
    EXPRESSION PRESETS
-   Each expression draws the complete face:
-   Eyes (sclera + iris + pupil + highlight) + Eyebrows + Nose + Mouth
+   Each preset renders: Eyes + Eyebrows + Nose + Mouth.
+   Written to match Duolingo's clean, large, expressive style.
    ══════════════════════════════════════════════════════ */
 
 function ExpressionLayer({
   expression,
   eyeColor,
   skinColor,
+  noseColor,
 }: {
   expression: string;
   eyeColor: string;
   skinColor: string;
+  noseColor: string;
 }) {
-  /* ── Reusable helpers ── */
+  /* ── REUSABLE: Teardrop nose (Duolingo signature) ── */
   const nose = (
+    <path
+      d="M195 216 C195 210, 200 204, 200 204 C200 204, 205 210, 205 216 C205 220, 203 224, 200 224 C197 224, 195 220, 195 216 Z"
+      fill={noseColor}
+    />
+  );
+
+  /* ── REUSABLE: Standard large Duolingo eyes ── */
+  const bigEyes = (irisOX = 0, irisOY = 0) => (
     <g>
-      <ellipse cx="200" cy="220" rx="7" ry="5" fill={skinColor} />
-      <path d="M193 224 C197 229,203 229,207 224" stroke="#00000018" strokeWidth="2" strokeLinecap="round" fill="none" />
+      {/* Left eye */}
+      <ellipse cx="170" cy="186" rx="26" ry="28" fill="white" />
+      <ellipse cx={172 + irisOX} cy={190 + irisOY} rx="14" ry="16" fill={eyeColor} />
+      <circle cx={175 + irisOX} cy={187 + irisOY} r="5" fill="white" />
+      {/* Right eye */}
+      <ellipse cx="230" cy="186" rx="26" ry="28" fill="white" />
+      <ellipse cx={232 + irisOX} cy={190 + irisOY} rx="14" ry="16" fill={eyeColor} />
+      <circle cx={235 + irisOX} cy={187 + irisOY} r="5" fill="white" />
     </g>
   );
 
-  /** Standard Duolingo eyes with iris looking in given direction */
-  const stdEyes = (irisOffX = 0, irisOffY = 2) => (
+  /* ── REUSABLE: Sleepy / half-lid eyes ── */
+  const sleepyEyes = (irisOX = 0) => (
     <g>
-      <ellipse cx="172" cy="192" rx="20" ry="22" fill="white" />
-      <ellipse cx="228" cy="192" rx="20" ry="22" fill="white" />
-      <circle cx={174 + irisOffX} cy={194 + irisOffY} r="11" fill={eyeColor} />
-      <circle cx={230 + irisOffX} cy={194 + irisOffY} r="11" fill={eyeColor} />
-      <circle cx={176 + irisOffX} cy={192 + irisOffY} r="5" fill="#000" />
-      <circle cx={232 + irisOffX} cy={192 + irisOffY} r="5" fill="#000" />
-      <circle cx={179 + irisOffX} cy={189 + irisOffY} r="3" fill="white" />
-      <circle cx={235 + irisOffX} cy={189 + irisOffY} r="3" fill="white" />
+      {/* Left eye */}
+      <ellipse cx="170" cy="186" rx="26" ry="28" fill="white" />
+      {/* Eyelid covering top portion */}
+      <ellipse cx="170" cy="176" rx="28" ry="16" fill={skinColor} />
+      <ellipse cx={172 + irisOX} cy="194" rx="13" ry="14" fill={eyeColor} />
+      {/* Right eye */}
+      <ellipse cx="230" cy="186" rx="26" ry="28" fill="white" />
+      <ellipse cx="230" cy="176" rx="28" ry="16" fill={skinColor} />
+      <ellipse cx={232 + irisOX} cy="194" rx="13" ry="14" fill={eyeColor} />
     </g>
   );
 
-  /** Half-lidded / sleepy eyes */
-  const sleepyEyes = (irisOffX = 0) => (
+  /* ── REUSABLE: Angry eyes with angled eyelids ── */
+  const angryEyes = (irisOX = 0) => (
     <g>
-      <ellipse cx="172" cy="192" rx="20" ry="22" fill="white" />
-      <ellipse cx="228" cy="192" rx="20" ry="22" fill="white" />
-      {/* Eyelid covers top half */}
-      <rect x="150" y="168" width="44" height="18" rx="4" fill={skinColor} />
-      <rect x="206" y="168" width="44" height="18" rx="4" fill={skinColor} />
-      <circle cx={174 + irisOffX} cy="198" r="10" fill={eyeColor} />
-      <circle cx={230 + irisOffX} cy="198" r="10" fill={eyeColor} />
-      <circle cx={176 + irisOffX} cy="196" r="5" fill="#000" />
-      <circle cx={232 + irisOffX} cy="196" r="5" fill="#000" />
+      {/* Left eye */}
+      <ellipse cx="170" cy="188" rx="26" ry="26" fill="white" />
+      <polygon points="144,172 196,180 196,168" fill={skinColor} />
+      <ellipse cx={172 + irisOX} cy="194" rx="13" ry="14" fill={eyeColor} />
+      <circle cx={175 + irisOX} cy="191" r="4" fill="white" />
+      {/* Right eye */}
+      <ellipse cx="230" cy="188" rx="26" ry="26" fill="white" />
+      <polygon points="256,172 204,180 204,168" fill={skinColor} />
+      <ellipse cx={232 + irisOX} cy="194" rx="13" ry="14" fill={eyeColor} />
+      <circle cx={235 + irisOX} cy="191" r="4" fill="white" />
     </g>
   );
 
-  /** Angry / furrowed eyes */
-  const angryEyes = (irisOffX = 0) => (
+  /* ── MOUTHS ── */
+  const smileMouth = (
+    <path d="M184 244 C194 256, 206 256, 216 244" stroke="#5C3A1E" strokeWidth="3.5" strokeLinecap="round" fill="none" />
+  );
+
+  const openSmileMouth = (
     <g>
-      <ellipse cx="172" cy="192" rx="20" ry="20" fill="white" />
-      <ellipse cx="228" cy="192" rx="20" ry="20" fill="white" />
-      {/* Angry eyelids — angled down toward center */}
-      <path d="M152 176 L192 184 L192 172 Z" fill={skinColor} />
-      <path d="M248 176 L208 184 L208 172 Z" fill={skinColor} />
-      <circle cx={174 + irisOffX} cy="196" r="10" fill={eyeColor} />
-      <circle cx={230 + irisOffX} cy="196" r="10" fill={eyeColor} />
-      <circle cx={176 + irisOffX} cy="194" r="5" fill="#000" />
-      <circle cx={232 + irisOffX} cy="194" r="5" fill="#000" />
-      <circle cx={179 + irisOffX} cy="191" r="3" fill="white" />
-      <circle cx={235 + irisOffX} cy="191" r="3" fill="white" />
+      <ellipse cx="200" cy="250" rx="16" ry="12" fill="#5C1A0A" />
+      <path d="M184 248 C194 256, 206 256, 216 248" fill="#E85D5D" />
     </g>
   );
 
-  /* Smile mouth */
-  const smileMouth = <path d="M183 240 C193 252,207 252,217 240" stroke="#3C2415" strokeWidth="3" strokeLinecap="round" fill="none" />;
-
-  /* Open-mouth happy */
-  const openHappyMouth = (
-    <g>
-      <ellipse cx="200" cy="244" rx="14" ry="11" fill="#5C1A0A" />
-      <path d="M186 242 C194 252,206 252,214 242" fill="#E85D5D" />
-    </g>
-  );
-
-  /* Wide laugh */
   const laughMouth = (
     <g>
-      <path d="M178 236 C190 260,210 260,222 236 Z" fill="#5C1A0A" />
-      <path d="M178 236 C190 244,210 244,222 236" fill="white" />
-      <path d="M185 250 C193 258,207 258,215 250" fill="#E85D5D" />
+      <path d="M178 242 C190 268, 210 268, 222 242 Z" fill="#5C1A0A" />
+      <path d="M180 244 C190 250, 210 250, 220 244" fill="white" />
+      <path d="M186 258 C194 266, 206 266, 214 258" fill="#E85D5D" />
     </g>
   );
 
-  /* Small 'o' surprised mouth */
-  const surprisedMouth = <ellipse cx="200" cy="246" rx="8" ry="10" fill="#5C1A0A" />;
-
-  /* Frown */
-  const frownMouth = <path d="M183 248 C193 238,207 238,217 248" stroke="#3C2415" strokeWidth="3" strokeLinecap="round" fill="none" />;
-
-  /* Neutral line */
-  const neutralMouth = <path d="M185 244 L215 244" stroke="#3C2415" strokeWidth="3" strokeLinecap="round" />;
-
-  /* Smirk (one-sided smile) */
-  const smirkMouth = <path d="M188 242 C198 250,210 248,218 240" stroke="#3C2415" strokeWidth="3" strokeLinecap="round" fill="none" />;
-
-  /* Tongue out */
-  const tongueOutMouth = (
+  const tongueMouth = (
     <g>
-      <ellipse cx="200" cy="244" rx="14" ry="11" fill="#5C1A0A" />
-      <ellipse cx="200" cy="252" rx="8" ry="7" fill="#E85D5D" />
+      <ellipse cx="200" cy="250" rx="16" ry="13" fill="#5C1A0A" />
+      <ellipse cx="200" cy="258" rx="9" ry="8" fill="#E85D5D" />
     </g>
   );
 
-  /* Gritting teeth */
+  const surprisedMouth = <ellipse cx="200" cy="252" rx="9" ry="11" fill="#5C1A0A" />;
+
+  const frownMouth = (
+    <path d="M184 254 C194 244, 206 244, 216 254" stroke="#5C3A1E" strokeWidth="3.5" strokeLinecap="round" fill="none" />
+  );
+
+  const neutralMouth = (
+    <path d="M185 250 L215 250" stroke="#5C3A1E" strokeWidth="3.5" strokeLinecap="round" />
+  );
+
+  const smirkMouth = (
+    <path d="M188 248 C200 256, 212 252, 220 244" stroke="#5C3A1E" strokeWidth="3.5" strokeLinecap="round" fill="none" />
+  );
+
   const grittingMouth = (
     <g>
-      <rect x="183" y="237" width="34" height="16" rx="6" fill="#5C1A0A" />
-      <rect x="186" y="240" width="28" height="5" rx="2" fill="white" />
-    </g>
-  );
-
-  /* Eyebrows: neutral, raised, furrowed */
-  const eyebrowNeutral = (
-    <g>
-      <rect x="156" y="168" width="28" height="5" rx="2.5" fill="#3C2415" />
-      <rect x="216" y="168" width="28" height="5" rx="2.5" fill="#3C2415" />
-    </g>
-  );
-
-  const eyebrowRaised = (
-    <g>
-      <rect x="156" y="162" width="28" height="5" rx="2.5" fill="#3C2415" transform="rotate(-5 170 164)" />
-      <rect x="216" y="162" width="28" height="5" rx="2.5" fill="#3C2415" transform="rotate(5 230 164)" />
-    </g>
-  );
-
-  const eyebrowFurrowed = (
-    <g>
-      <rect x="156" y="170" width="28" height="5" rx="2.5" fill="#3C2415" transform="rotate(8 170 172)" />
-      <rect x="216" y="170" width="28" height="5" rx="2.5" fill="#3C2415" transform="rotate(-8 230 172)" />
-    </g>
-  );
-
-  const eyebrowWorried = (
-    <g>
-      <rect x="156" y="165" width="28" height="5" rx="2.5" fill="#3C2415" transform="rotate(-10 170 167)" />
-      <rect x="216" y="165" width="28" height="5" rx="2.5" fill="#3C2415" transform="rotate(10 230 167)" />
+      <rect x="182" y="244" width="36" height="18" rx="7" fill="#5C1A0A" />
+      <rect x="185" y="248" width="30" height="6" rx="2" fill="white" />
     </g>
   );
 
   switch (expression) {
     /* ─── HAPPY FAMILY ─── */
     case "exp-happy-left":
-      return <g>{stdEyes(-4, 0)}{eyebrowNeutral}{nose}{smileMouth}</g>;
+      return <g>{bigEyes(-5, 0)}{nose}{smileMouth}</g>;
 
     case "exp-happy-right":
-      return <g>{stdEyes(4, 0)}{eyebrowNeutral}{nose}{smileMouth}</g>;
+      return <g>{bigEyes(5, 0)}{nose}{smileMouth}</g>;
 
     case "exp-laugh":
-      return <g>{stdEyes(0, 0)}{eyebrowRaised}{nose}{laughMouth}</g>;
+      return <g>{bigEyes(0, -2)}{nose}{laughMouth}</g>;
 
     case "exp-tongue":
-      return <g>{stdEyes(0, 0)}{eyebrowRaised}{nose}{tongueOutMouth}</g>;
+      return <g>{bigEyes(0, 0)}{nose}{tongueMouth}</g>;
 
     case "exp-open-smile":
-      return <g>{stdEyes(0, 0)}{eyebrowNeutral}{nose}{openHappyMouth}</g>;
+      return <g>{bigEyes(0, 0)}{nose}{openSmileMouth}</g>;
 
     case "exp-smirk":
-      return <g>{stdEyes(4, 0)}{eyebrowNeutral}{nose}{smirkMouth}</g>;
+      return <g>{bigEyes(4, 0)}{nose}{smirkMouth}</g>;
 
-    /* ─── SURPRISED / EXCITED ─── */
+    /* ─── SURPRISED / WORRIED ─── */
     case "exp-surprised":
-      return <g>{stdEyes(0, -2)}{eyebrowRaised}{nose}{surprisedMouth}</g>;
+      return (
+        <g>
+          {/* Extra-large eyes for surprise */}
+          <ellipse cx="170" cy="184" rx="28" ry="32" fill="white" />
+          <ellipse cx="230" cy="184" rx="28" ry="32" fill="white" />
+          <ellipse cx="174" cy="190" rx="14" ry="16" fill={eyeColor} />
+          <ellipse cx="234" cy="190" rx="14" ry="16" fill={eyeColor} />
+          <circle cx="178" cy="186" r="5" fill="white" />
+          <circle cx="238" cy="186" r="5" fill="white" />
+          {nose}{surprisedMouth}
+        </g>
+      );
 
     case "exp-shocked":
       return (
         <g>
-          {/* Extra-wide eyes */}
-          <ellipse cx="172" cy="190" rx="24" ry="26" fill="white" />
-          <ellipse cx="228" cy="190" rx="24" ry="26" fill="white" />
-          <circle cx="174" cy="194" r="12" fill={eyeColor} />
-          <circle cx="230" cy="194" r="12" fill={eyeColor} />
-          <circle cx="176" cy="192" r="6" fill="#000" />
-          <circle cx="232" cy="192" r="6" fill="#000" />
-          <circle cx="180" cy="188" r="4" fill="white" />
-          <circle cx="236" cy="188" r="4" fill="white" />
-          {eyebrowRaised}{nose}
-          {laughMouth}
+          <ellipse cx="170" cy="184" rx="30" ry="34" fill="white" />
+          <ellipse cx="230" cy="184" rx="30" ry="34" fill="white" />
+          <ellipse cx="174" cy="190" rx="15" ry="17" fill={eyeColor} />
+          <ellipse cx="234" cy="190" rx="15" ry="17" fill={eyeColor} />
+          <circle cx="178" cy="186" r="6" fill="white" />
+          <circle cx="238" cy="186" r="6" fill="white" />
+          {nose}{laughMouth}
         </g>
       );
 
     case "exp-worried":
-      return <g>{stdEyes(0, 2)}{eyebrowWorried}{nose}{frownMouth}</g>;
+      return <g>{bigEyes(0, 3)}{nose}{frownMouth}</g>;
 
     /* ─── ANGRY FAMILY ─── */
     case "exp-angry":
@@ -374,7 +378,7 @@ function ExpressionLayer({
     case "exp-angry-teeth":
       return <g>{angryEyes(0)}{nose}{grittingMouth}</g>;
 
-    /* ─── SLEEPY / BORED FAMILY ─── */
+    /* ─── SLEEPY / BORED ─── */
     case "exp-sleepy":
       return <g>{sleepyEyes(0)}{nose}{smileMouth}</g>;
 
@@ -382,13 +386,13 @@ function ExpressionLayer({
       return <g>{sleepyEyes(0)}{nose}{neutralMouth}</g>;
 
     case "exp-sleepy-tongue":
-      return <g>{sleepyEyes(0)}{nose}{tongueOutMouth}</g>;
+      return <g>{sleepyEyes(0)}{nose}{tongueMouth}</g>;
 
     case "exp-unamused":
       return <g>{sleepyEyes(2)}{nose}{frownMouth}</g>;
 
-    /* ─── DEFAULT ─── */
+    /* ─── DEFAULT: Duolingo standard happy face ─── */
     default:
-      return <g>{stdEyes(0, 2)}{eyebrowNeutral}{nose}{smileMouth}</g>;
+      return <g>{bigEyes(0, 0)}{nose}{smileMouth}</g>;
   }
 }
