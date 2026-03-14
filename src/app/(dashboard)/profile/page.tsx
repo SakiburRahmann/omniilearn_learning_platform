@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { Pencil } from "lucide-react";
 import { ModularAvatar, DEFAULT_AVATAR } from "@/components/avatar/modular-avatar";
-import type { AvatarConfig } from "@/components/avatar/modular-avatar";
+
 import { api } from "@/utils/trpc";
 
 export default function ProfilePage() {

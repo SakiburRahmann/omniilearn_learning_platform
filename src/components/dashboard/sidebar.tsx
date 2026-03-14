@@ -15,7 +15,7 @@ import { cn } from "@/lib/utils";
 import { createClient } from "@/lib/supabase-client";
 import { api } from "@/utils/trpc";
 import { ModularAvatar, DEFAULT_AVATAR } from "@/components/avatar/modular-avatar";
-import type { AvatarConfig } from "@/components/avatar/modular-avatar";
+
 
 const navItems = [
   { icon: Home, label: "Learn", href: "/dashboard" },

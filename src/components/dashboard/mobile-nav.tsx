@@ -6,7 +6,7 @@ import { Home, Map, Trophy, User, Sparkles, Settings } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { api } from "@/utils/trpc";
 import { ModularAvatar, DEFAULT_AVATAR } from "@/components/avatar/modular-avatar";
-import type { AvatarConfig } from "@/components/avatar/modular-avatar";
+
 
 const mobileItems = [
   { icon: Home, label: "Learn", href: "/dashboard" },
