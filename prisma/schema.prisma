@@ -788,3 +788,11 @@ model DevImpersonationLog {
   @@index([developerUserId])
 }
 
+model PlatformSettings {
+  id                  String   @id @default("singleton")
+  maintenanceMode     Boolean  @default(false)
+  maintenanceMessage  String?  @db.Text
+  maintenanceStarted  DateTime?
+  platformName        String   @default("OmniiLearn")
+  updatedAt           DateTime @updatedAt
+}

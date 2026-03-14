@@ -7,6 +7,21 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase-client";
 import { useRouter } from "next/navigation";
 
+/**
+ * Determines the post-login redirect based on email convention.
+ * developer@omniilearn.com → /dev
+ * admin@omniilearn.com → /admin
+ * *.coursedesigner@omniilearn.com → /creator
+ * Everyone else → /dashboard (student)
+ */
+function getRedirectForEmail(email: string): string {
+  const lower = email.toLowerCase();
+  if (lower === "developer@omniilearn.com") return "/dev";
+  if (lower === "admin@omniilearn.com") return "/admin";
+  if (lower.endsWith(".coursedesigner@omniilearn.com")) return "/creator";
+  return "/dashboard";
+}
+
 export default function LoginForm() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -35,7 +50,9 @@ export default function LoginForm() {
         throw signInError;
       }
 
-      router.push("/dashboard");
+      // Determine redirect based on email domain convention
+      const redirectPath = getRedirectForEmail(email);
+      router.push(redirectPath);
       router.refresh();
     } catch (err) {
       const error = err as Error;

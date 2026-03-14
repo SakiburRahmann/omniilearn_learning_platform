@@ -9,21 +9,33 @@ import {
   User, 
   Settings, 
   LogOut,
-  Sparkles
+  Sparkles,
+  Shield,
+  Palette,
+  Code2
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { createClient } from "@/lib/supabase-client";
 import { api } from "@/utils/trpc";
 import { ModularAvatar, DEFAULT_AVATAR } from "@/components/avatar/modular-avatar";
 
+interface NavItem {
+  icon: React.ComponentType<{ className?: string }>;
+  label: string;
+  href: string;
+  roles?: string[];
+}
 
-const navItems = [
-  { icon: Home, label: "Learn", href: "/dashboard" },
-  { icon: Map, label: "Courses", href: "/courses" },
-  { icon: Trophy, label: "Leaderboards", href: "/leagues" },
-  { icon: Sparkles, label: "Quests", href: "/quests" },
-  { icon: User, label: "Profile", href: "/profile" },
-  { icon: Settings, label: "Settings", href: "/settings" },
+const navItems: NavItem[] = [
+  { icon: Home, label: "Learn", href: "/dashboard", roles: ["STUDENT", "DEVELOPER"] },
+  { icon: Map, label: "Courses", href: "/courses", roles: ["STUDENT", "DEVELOPER"] },
+  { icon: Trophy, label: "Leaderboards", href: "/leagues", roles: ["STUDENT", "DEVELOPER"] },
+  { icon: Sparkles, label: "Quests", href: "/quests", roles: ["STUDENT", "DEVELOPER"] },
+  { icon: User, label: "Profile", href: "/profile", roles: ["STUDENT", "DEVELOPER"] },
+  { icon: Settings, label: "Settings", href: "/settings", roles: ["STUDENT", "DEVELOPER"] },
+  { icon: Palette, label: "Creator Studio", href: "/creator", roles: ["COURSE_CREATOR"] },
+  { icon: Shield, label: "Admin Panel", href: "/admin", roles: ["ADMIN"] },
+  { icon: Code2, label: "Developer", href: "/dev", roles: ["DEVELOPER"] },
 ];
 
 export function Sidebar({ className }: { className?: string }) {
@@ -35,8 +47,16 @@ export function Sidebar({ className }: { className?: string }) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: profileData } = api.user.getProfile.useQuery(undefined) as any;
   
+  const userRole: string = profileData?.role || "STUDENT";
+  
   // Force-cast to simple Record to kill excessive typescript recursion on Prisma.JsonValue
   const avatarConfig = (profileData?.studentProfile?.avatarConfig as Record<string, unknown>) || DEFAULT_AVATAR;
+
+  // Filter nav items based on user role
+  const visibleItems = navItems.filter((item) => {
+    if (!item.roles) return true;
+    return item.roles.includes(userRole);
+  });
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -56,8 +76,8 @@ export function Sidebar({ className }: { className?: string }) {
 
       {/* Navigation */}
       <nav className="flex-1 space-y-2">
-        {navItems.map((item) => {
-          const isActive = pathname === item.href;
+        {visibleItems.map((item) => {
+          const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
           return (
             <Link
               key={item.href}
