@@ -20,7 +20,7 @@ import { ModularAvatar, DEFAULT_AVATAR } from "@/components/avatar/modular-avata
 const navItems = [
   { icon: Home, label: "Learn", href: "/dashboard" },
   { icon: Map, label: "Courses", href: "/courses" },
-  { icon: Trophy, label: "Leagues", href: "/leagues" },
+  { icon: Trophy, label: "Leaderboards", href: "/leagues" },
   { icon: Sparkles, label: "Quests", href: "/quests" },
   { icon: User, label: "Profile", href: "/profile" },
   { icon: Settings, label: "Settings", href: "/settings" },

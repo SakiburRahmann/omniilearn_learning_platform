@@ -1,7 +1,6 @@
 import { db } from "./prisma";
 import { getCurrentWeekKey } from "./gamification";
 import { Prisma } from "@prisma/client";
-import { seedLeagueGroupWithGhosts } from "./ghost-engine";
 
 /**
  * Ensures a user is joined to a league group for the current week
@@ -54,8 +53,6 @@ export async function syncUserLeagueXP(
           memberCount: 0
         }
       });
-      // Seed the new group with competitive ghosts
-      await seedLeagueGroupWithGhosts(group.id, tier, tx);
     }
 
     // Join the group

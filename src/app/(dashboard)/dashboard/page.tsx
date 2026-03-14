@@ -90,11 +90,11 @@ export default function DashboardPage() {
               </button>
            </div>
            
-           {/* League Standings Mini */}
+           {/* Leaderboard Standings Mini */}
            <div className="duo-card p-6 bg-white border-2 border-[#E5E5E5] rounded-2xl shadow-[0_4px_0_0_#E5E5E5] group cursor-pointer hover:border-primary transition-all"
                 onClick={() => router.push('/leagues')}>
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-black text-[#4B4B4B] uppercase tracking-wide">Leagues</h3>
+                <h3 className="text-lg font-black text-[#4B4B4B] uppercase tracking-wide">Leaderboards</h3>
                 <span className="text-[10px] font-black text-primary uppercase tracking-widest group-hover:underline">View All</span>
               </div>
               <div className="flex items-center gap-4">

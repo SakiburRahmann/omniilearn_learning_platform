@@ -3,7 +3,6 @@ import { createTRPCRouter, protectedProcedure } from "../trpc";
 import { db } from "@/lib/prisma";
 import { getCurrentWeekKey } from "@/lib/gamification";
 import { TRPCError } from "@trpc/server";
-import { seedLeagueGroupWithGhosts } from "@/lib/ghost-engine";
 
 export const leagueRouter = createTRPCRouter({
   getCurrentLeague: protectedProcedure
@@ -21,7 +20,7 @@ export const leagueRouter = createTRPCRouter({
       // If user isn't in a league for this week yet, join them
       if (!userLeague) {
         userLeague = await db.$transaction(async (tx) => {
-          // 1. Determine tier (default 1 for now, or based on history)
+          // 1. Determine tier
           const lastWeek = await tx.userLeague.findFirst({
             where: { userId },
             orderBy: { weekKey: 'desc' },
@@ -53,8 +52,6 @@ export const leagueRouter = createTRPCRouter({
                 memberCount: 0
               }
             });
-            // Seed ghost users for competition
-            await seedLeagueGroupWithGhosts(group.id, tier, tx);
           }
 
           // 4. Join the group
@@ -108,4 +105,36 @@ export const leagueRouter = createTRPCRouter({
         weekKey
       };
     }),
+
+  getGlobalLeaderboard: protectedProcedure
+    .query(async () => {
+      // Fetch top 50 users by total XP platform-wide
+      const topUsers = await db.studentProfile.findMany({
+        orderBy: { totalXp: 'desc' },
+        take: 50,
+        select: {
+          totalXp: true,
+          user: {
+            select: {
+              id: true,
+              firstName: true,
+              lastName: true,
+              studentProfile: {
+                select: { avatarConfig: true }
+              }
+            }
+          }
+        }
+      });
+
+      return {
+        topUsers: topUsers.map(profile => ({
+          userId: profile.user.id,
+          firstName: profile.user.firstName,
+          lastName: profile.user.lastName,
+          avatarConfig: profile.user.studentProfile?.avatarConfig,
+          xp: profile.totalXp
+        }))
+      };
+    })
 });
