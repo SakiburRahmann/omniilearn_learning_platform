@@ -211,11 +211,22 @@ function LeaderboardRow({ rank, entry, isUser, xp }: { rank: number, entry: any,
       "flex items-center gap-3 md:gap-4 px-4 md:px-6 py-4 transition-all group border-l-4",
       isUser ? "bg-primary/10 border-l-primary shadow-[inset_0_2px_4px_rgba(0,0,0,0.02)]" : "hover:bg-[#F7F7F7] border-l-transparent"
     )}>
-      <div className="w-6 md:w-8 flex justify-center shrink-0">
-        {rank === 1 ? <Medal className="w-6 h-6 md:w-7 md:h-7 text-[#FFD700] drop-shadow-sm" /> : 
-         rank === 2 ? <Medal className="w-6 h-6 md:w-7 md:h-7 text-[#C0C0C0] drop-shadow-sm" /> : 
-         rank === 3 ? <Medal className="w-6 h-6 md:w-7 md:h-7 text-[#CD7F32] drop-shadow-sm" /> : 
-         <span className={cn("font-black text-base md:text-lg", rank <= 10 ? "text-accent" : "text-[#AFAFAF]", isUser && "text-primary")}>{rank}</span>}
+      <div className="w-10 md:w-12 flex items-center justify-center shrink-0">
+        <div className="relative flex items-center justify-center">
+          {rank === 1 ? <Medal className="absolute -top-2.5 -right-2.5 w-4.5 h-4.5 md:w-5 md:h-5 text-[#FFD700] drop-shadow-sm rotate-12" /> : 
+           rank === 2 ? <Medal className="absolute -top-2.5 -right-2.5 w-4.5 h-4.5 md:w-5 md:h-5 text-[#C0C0C0] drop-shadow-sm rotate-12" /> : 
+           rank === 3 ? <Medal className="absolute -top-2.5 -right-2.5 w-4.5 h-4.5 md:w-5 md:h-5 text-[#CD7F32] drop-shadow-sm rotate-12" /> : null}
+          
+          <span className={cn(
+            "font-black text-base md:text-lg w-8 h-8 md:w-9 md:h-9 flex items-center justify-center rounded-xl transition-all",
+            rank === 1 ? "bg-[#FFD700]/10 text-[#FFD700] border-2 border-[#FFD700]/20 shadow-sm" :
+            rank === 2 ? "bg-[#C0C0C0]/10 text-[#6B7280] border-2 border-[#C0C0C0]/20 shadow-sm" :
+            rank === 3 ? "bg-[#CD7F32]/10 text-[#CD7F32] border-2 border-[#CD7F32]/20 shadow-sm" :
+            (isUser ? "bg-primary/20 text-primary border-2 border-primary/30" : rank <= 10 ? "text-accent bg-accent/5" : "text-[#AFAFAF]")
+          )}>
+            {rank}
+          </span>
+        </div>
       </div>
 
       <div className={cn(
