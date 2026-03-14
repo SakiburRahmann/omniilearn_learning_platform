@@ -4,6 +4,7 @@ import { TRPCError } from "@trpc/server";
 import { db } from "@/lib/prisma";
 import { ensureUserSynced } from "@/lib/user-sync";
 import { calculateCurrentHearts, calculateNewStreak } from "@/lib/gamification";
+import { syncUserLeagueXP } from "@/lib/league-sync";
 
 export const learningRouter = createTRPCRouter({
   getLearningPath: publicProcedure
@@ -207,6 +208,9 @@ export const learningRouter = createTRPCRouter({
             referenceId: input.lessonId
           }
         });
+
+        // 6b. Sync XP with Weekly League
+        await syncUserLeagueXP(dbUserId, input.xpEarned, tx);
 
         // 7. Unlock next lesson logic
         const currentLesson = await tx.lesson.findUnique({
