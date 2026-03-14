@@ -20,14 +20,12 @@ interface UnitSectionProps {
 export function UnitSection({ title, lessons, onLessonClick }: UnitSectionProps) {
   return (
     <section className="w-full max-w-2xl mx-auto mb-12">
-      <div className="space-y-12 animate-in slide-in-from-bottom-4 duration-500">
-      <div className="bg-primary rounded-[2rem] p-8 text-white shadow-[0_12px_0_0_#E6722D] mb-12 transform hover:-rotate-1 transition-transform hover:scale-[1.02] active:scale-95 cursor-default relative overflow-hidden group">
-        {/* Subtle inner glow */}
-        <div className="absolute inset-0 bg-gradient-to-tr from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-        
-        <p className="text-sm font-black uppercase tracking-widest opacity-80 mb-2">Unit 1</p>
-        <h2 className="text-3xl font-black">{title}</h2>
-      </div>
+    <div className="bg-primary rounded-[2rem] p-8 pb-10 text-white shadow-[0_8px_0_0_#E6722D] mb-12 relative overflow-hidden">
+      {/* Dynamic light streak for depth */}
+      <div className="absolute top-0 left-0 w-full h-1 bg-white/20" />
+      
+      <p className="text-sm font-black uppercase tracking-widest opacity-80 mb-2">Unit 1</p>
+      <h2 className="text-3xl font-black leading-tight">{title}</h2>
     </div>
 
       {/* Path Container */}
