@@ -28,6 +28,7 @@ export type MicahOptions = {
   shirt?: string;
   shirtColor?: string;
   backgroundColor?: string;
+  ears?: string;
 };
 
 export const DEFAULT_AVATAR: MicahOptions = {
