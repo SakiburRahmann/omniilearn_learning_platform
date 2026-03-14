@@ -279,7 +279,8 @@ model Enrollment {
   isCompleted Boolean   @default(false)
 
   @@unique([userId, courseId])
-  @@index([userId])
+  @@index([userId, enrolledAt(sort: Desc)])
+  @@index([courseId])
 }
 
 model LessonCompletion {
@@ -327,6 +328,7 @@ model LessonUnlock {
   unlockedAt DateTime @default(now())
 
   @@unique([userId, lessonId])
+  @@index([userId])
 }
 
 model Certificate {

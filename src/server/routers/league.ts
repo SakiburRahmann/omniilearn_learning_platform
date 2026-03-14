@@ -5,6 +5,22 @@ import { getCurrentWeekKey } from "@/lib/gamification";
 import { TRPCError } from "@trpc/server";
 import { ensureUserSynced } from "@/lib/user-sync";
 
+// In-Memory Cache for Global Leaderboards (TTL: 1 minute)
+const cache = new Map<string, { data: any; timestamp: number }>();
+const CACHE_TTL = 60 * 1000; // 1 minute
+
+function getCached(key: string) {
+  const cached = cache.get(key);
+  if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
+    return cached.data;
+  }
+  return null;
+}
+
+function setCache(key: string, data: any) {
+  cache.set(key, { data, timestamp: Date.now() });
+}
+
 export const leagueRouter = createTRPCRouter({
   /**
    * League Cohort: Users in the same group of 30
@@ -12,21 +28,18 @@ export const leagueRouter = createTRPCRouter({
   getCurrentLeague: protectedProcedure
     .query(async ({ ctx }) => {
       const weekKey = getCurrentWeekKey();
-      // ALWAYS sync user to ensure we use the correct DB ID (cuid vs uuid)
       const user = await ensureUserSynced(ctx.user);
       const userId = user.id;
 
+      // High-performance finding using unified unique index
       let userLeague = await db.userLeague.findFirst({
         where: { userId, weekKey },
-        include: {
-          leagueGroup: true
-        }
+        include: { leagueGroup: { select: { id: true, tier: true, weekKey: true } } }
       });
 
       // Join if not in a league
       if (!userLeague) {
         userLeague = await db.$transaction(async (tx) => {
-          // Double check inside tx for concurrent hits
           const existing = await tx.userLeague.findFirst({
              where: { userId, weekKey },
              include: { leagueGroup: true }
@@ -36,7 +49,7 @@ export const leagueRouter = createTRPCRouter({
           const lastWeeksEntry = await tx.userLeague.findFirst({
             where: { userId },
             orderBy: { weekKey: 'desc' },
-            include: { leagueGroup: true }
+            select: { result: true, leagueGroup: { select: { tier: true } } }
           });
 
           let tier = 1;
@@ -47,12 +60,14 @@ export const leagueRouter = createTRPCRouter({
           }
 
           let group = await tx.leagueGroup.findFirst({
-            where: { tier, weekKey, memberCount: { lt: 30 } }
+            where: { tier, weekKey, memberCount: { lt: 30 } },
+            select: { id: true }
           });
 
           if (!group) {
             group = await tx.leagueGroup.create({
-              data: { tier, weekKey, memberCount: 0 }
+              data: { tier, weekKey, memberCount: 0 },
+              select: { id: true }
             });
           }
 
@@ -74,7 +89,7 @@ export const leagueRouter = createTRPCRouter({
         throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Failed to join league" });
       }
 
-      // Fetch the full leaderboard for this group - FAST query with the new index
+      // Fetch the full leaderboard for this group - ULTRA FAST query with composite index [leagueGroupId, xpEarned DESC]
       const leaderboard = await db.userLeague.findMany({
         where: { leagueGroupId: userLeague.leagueGroupId },
         select: {
@@ -94,7 +109,6 @@ export const leagueRouter = createTRPCRouter({
         take: 30
       });
 
-      // Calculate Rank Info
       const rank = leaderboard.findIndex(e => e.userId === userId) + 1;
 
       return {
@@ -107,7 +121,7 @@ export const leagueRouter = createTRPCRouter({
     }),
 
   /**
-   * Global This Week: Top 50 by weekly XP
+   * Global This Week: Top 50 by weekly XP (Cached)
    */
   getThisWeekLeaderboard: protectedProcedure
     .query(async ({ ctx }) => {
@@ -115,25 +129,31 @@ export const leagueRouter = createTRPCRouter({
       const user = await ensureUserSynced(ctx.user);
       const userId = user.id;
 
-      const topUsers = await db.userLeague.findMany({
-        where: { weekKey },
-        orderBy: { xpEarned: 'desc' },
-        take: 50,
-        select: {
-          userId: true,
-          xpEarned: true,
-          user: {
-            select: {
-              firstName: true,
-              lastName: true,
-              studentProfile: { select: { avatarConfig: true } }
+      const cacheKey = `week_${weekKey}`;
+      let topUsers = getCached(cacheKey);
+
+      if (!topUsers) {
+        topUsers = await db.userLeague.findMany({
+          where: { weekKey },
+          orderBy: { xpEarned: 'desc' },
+          take: 50,
+          select: {
+            userId: true,
+            xpEarned: true,
+            user: {
+              select: {
+                firstName: true,
+                lastName: true,
+                studentProfile: { select: { avatarConfig: true } }
+              }
             }
           }
-        }
-      });
+        });
+        setCache(cacheKey, topUsers);
+      }
 
       // Calculate personal rank if not in top 50
-      let personalRank = topUsers.findIndex(u => u.userId === userId) + 1;
+      let personalRank = topUsers.findIndex((u: any) => u.userId === userId) + 1;
       let personalXp = 0;
 
       if (personalRank === 0) {
@@ -143,7 +163,6 @@ export const leagueRouter = createTRPCRouter({
         });
         personalXp = userEntry?.xpEarned || 0;
         
-        // Count users with more XP
         const countHigher = await db.userLeague.count({
           where: { weekKey, xpEarned: { gt: personalXp } }
         });
@@ -153,7 +172,7 @@ export const leagueRouter = createTRPCRouter({
       }
 
       return {
-        topUsers: topUsers.map((u, i) => ({
+        topUsers: topUsers.map((u: any, i: number) => ({
           userId: u.userId,
           firstName: u.user.firstName,
           lastName: u.user.lastName,
@@ -168,30 +187,36 @@ export const leagueRouter = createTRPCRouter({
     }),
 
   /**
-   * All Time: Top 50 by total XP
+   * All Time: Top 50 by total XP (Cached)
    */
   getAllTimeLeaderboard: protectedProcedure
     .query(async ({ ctx }) => {
       const user = await ensureUserSynced(ctx.user);
       const userId = user.id;
 
-      const topProfiles = await db.studentProfile.findMany({
-        orderBy: { totalXp: 'desc' },
-        take: 50,
-        select: {
-          userId: true,
-          totalXp: true,
-          user: {
-            select: {
-              firstName: true,
-              lastName: true
-            }
-          },
-          avatarConfig: true
-        }
-      });
+      const cacheKey = "all_time";
+      let topProfiles = getCached(cacheKey);
 
-      let personalRank = topProfiles.findIndex(p => p.userId === userId) + 1;
+      if (!topProfiles) {
+        topProfiles = await db.studentProfile.findMany({
+          orderBy: { totalXp: 'desc' },
+          take: 50,
+          select: {
+            userId: true,
+            totalXp: true,
+            user: {
+              select: {
+                firstName: true,
+                lastName: true
+              }
+            },
+            avatarConfig: true
+          }
+        });
+        setCache(cacheKey, topProfiles);
+      }
+
+      let personalRank = topProfiles.findIndex((p: any) => p.userId === userId) + 1;
       let personalXp = 0;
 
       if (personalRank === 0) {
@@ -210,7 +235,7 @@ export const leagueRouter = createTRPCRouter({
       }
 
       return {
-        topUsers: topProfiles.map((p, i) => ({
+        topUsers: topProfiles.map((p: any, i: number) => ({
           userId: p.userId,
           firstName: p.user.firstName,
           lastName: p.user.lastName,

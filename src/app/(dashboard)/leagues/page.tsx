@@ -53,7 +53,7 @@ export default function LeaderboardsPage() {
 
   const isLoading = (activeTab === "league" && isLeagueLoading) || (activeTab === "week" && isWeekLoading) || (activeTab === "all" && isAllTimeLoading);
 
-  const currentTier = leagueData?.userLeague?.leagueGroup?.tier || 1;
+  const currentTier = (leagueData?.userLeague as any)?.leagueGroup?.tier || 1;
   const tierInfo = LEAGUE_TIERS.find(t => t.id === currentTier);
 
   // Determine if user is in the visible top list
@@ -65,9 +65,9 @@ export default function LeaderboardsPage() {
 
     const actualUserId = activeDbUserId || userId || "";
 
-    if (activeTab === "league") return { rank: leagueData?.personalRank || 0, xp: leagueData?.userLeague?.xpEarned || 0, inList: leagueData?.leaderboard.some(e => e.userId === actualUserId), dbUserId: actualUserId };
-    if (activeTab === "week") return { rank: weekData?.personalRank || 0, xp: weekData?.personalXp || 0, inList: weekData?.topUsers.some(u => u.userId === actualUserId), dbUserId: actualUserId };
-    return { rank: allTimeData?.personalRank || 0, xp: allTimeData?.personalXp || 0, inList: allTimeData?.topUsers.some(p => p.userId === actualUserId), dbUserId: actualUserId };
+    if (activeTab === "league") return { rank: leagueData?.personalRank || 0, xp: leagueData?.userLeague?.xpEarned || 0, inList: leagueData?.leaderboard.some((e: any) => e.userId === actualUserId), dbUserId: actualUserId };
+    if (activeTab === "week") return { rank: weekData?.personalRank || 0, xp: weekData?.personalXp || 0, inList: weekData?.topUsers.some((u: any) => u.userId === actualUserId), dbUserId: actualUserId };
+    return { rank: allTimeData?.personalRank || 0, xp: allTimeData?.personalXp || 0, inList: allTimeData?.topUsers.some((p: any) => p.userId === actualUserId), dbUserId: actualUserId };
   };
 
   const personalInfo = getPersonalRankInfo();
@@ -109,12 +109,12 @@ export default function LeaderboardsPage() {
                 <LoadingSkeleton />
               ) : activeTab === "league" ? (
                 leagueData?.leaderboard.length ? (
-                  leagueData.leaderboard.map((entry, index) => (
+                  leagueData.leaderboard.map((entry: any, index: number) => (
                     <LeaderboardRow key={entry.id} rank={index + 1} entry={entry} isUser={entry.userId === personalInfo.dbUserId} xp={entry.xpEarned} />
                   ))
                 ) : leagueData?.userLeague ? (
                   <LeaderboardRow 
-                    rank={1} 
+                    rank={leagueData.personalRank} 
                     entry={{ 
                       userId: personalInfo.dbUserId,
                       user: { 
@@ -128,11 +128,11 @@ export default function LeaderboardsPage() {
                   />
                 ) : null
               ) : activeTab === "week" ? (
-                weekData?.topUsers.map((user, index) => (
+                weekData?.topUsers.map((user: any, index: number) => (
                   <LeaderboardRow key={user.userId} rank={index + 1} entry={user} isUser={user.userId === personalInfo.dbUserId} xp={user.xp} />
                 ))
               ) : (
-                allTimeData?.topUsers.map((user, index) => (
+                allTimeData?.topUsers.map((user: any, index: number) => (
                   <LeaderboardRow key={user.userId} rank={index + 1} entry={user} isUser={user.userId === personalInfo.dbUserId} xp={user.xp} />
                 ))
               )}
@@ -155,9 +155,9 @@ export default function LeaderboardsPage() {
                   <span className="font-black text-primary text-lg">Your Current Rank</span>
                   <span className="text-xs font-bold text-[#AFAFAF] uppercase tracking-widest">Only {personalInfo.rank - 50} spots till the top 50!</span>
                 </div>
-                <div className="flex items-center gap-2 bg-[#3CC7F5]/10 px-4 py-2 rounded-2xl border-2 border-[#3CC7F5]/20">
-                  <Zap className="w-5 h-5 text-[#3CC7F5] fill-[#3CC7F5]" />
-                  <span className="font-black text-[#3CC7F5] text-lg">{personalInfo.xp}</span>
+                <div className="flex items-center gap-2 bg-primary/10 px-4 py-2 rounded-2xl border-2 border-primary/20">
+                  <Zap className="w-5 h-5 text-primary fill-primary" />
+                  <span className="font-black text-primary text-lg">{personalInfo.xp}</span>
                 </div>
               </div>
             )}
@@ -209,18 +209,18 @@ function LeaderboardRow({ rank, entry, isUser, xp }: { rank: number, entry: any,
   return (
     <div className={cn(
       "flex items-center gap-3 md:gap-4 px-4 md:px-6 py-4 transition-all group border-l-4",
-      isUser ? "bg-[#3CC7F5]/5 border-l-[#3CC7F5] shadow-[inset_0_2px_4px_rgba(0,0,0,0.02)]" : "hover:bg-[#F7F7F7] border-l-transparent"
+      isUser ? "bg-primary/10 border-l-primary shadow-[inset_0_2px_4px_rgba(0,0,0,0.02)]" : "hover:bg-[#F7F7F7] border-l-transparent"
     )}>
       <div className="w-6 md:w-8 flex justify-center shrink-0">
         {rank === 1 ? <Medal className="w-6 h-6 md:w-7 md:h-7 text-[#FFD700] drop-shadow-sm" /> : 
          rank === 2 ? <Medal className="w-6 h-6 md:w-7 md:h-7 text-[#C0C0C0] drop-shadow-sm" /> : 
          rank === 3 ? <Medal className="w-6 h-6 md:w-7 md:h-7 text-[#CD7F32] drop-shadow-sm" /> : 
-         <span className={cn("font-black text-base md:text-lg", rank <= 10 ? "text-accent" : "text-[#AFAFAF]", isUser && "text-[#3CC7F5]")}>{rank}</span>}
+         <span className={cn("font-black text-base md:text-lg", rank <= 10 ? "text-accent" : "text-[#AFAFAF]", isUser && "text-primary")}>{rank}</span>}
       </div>
 
       <div className={cn(
         "w-10 h-10 md:w-12 md:h-12 rounded-full overflow-hidden border-2 bg-white transition-all shrink-0",
-        isUser ? "border-[#3CC7F5] shadow-sm" : "border-[#E5E5E5] group-hover:border-primary"
+        isUser ? "border-primary shadow-sm" : "border-[#E5E5E5] group-hover:border-primary"
       )}>
         <ModularAvatar 
           config={((entry.user?.studentProfile || entry).avatarConfig as any) || DEFAULT_AVATAR} 
@@ -231,19 +231,19 @@ function LeaderboardRow({ rank, entry, isUser, xp }: { rank: number, entry: any,
 
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2">
-          <span className={cn("font-black text-sm md:text-lg truncate", isUser ? "text-[#3CC7F5]" : "text-[#4B4B4B]")}>
+          <span className={cn("font-black text-sm md:text-lg truncate", isUser ? "text-primary" : "text-[#4B4B4B]")}>
             {(entry.user?.firstName || entry.firstName)} {(entry.user?.lastName || entry.lastName)}
           </span>
-          {isUser && <span className="bg-[#3CC7F5] text-white text-[8px] md:text-[10px] font-black px-1.5 md:px-2 py-0.5 rounded-lg uppercase tracking-wider shrink-0 shadow-sm">YOU</span>}
+          {isUser && <span className="bg-primary text-white text-[8px] md:text-[10px] font-black px-1.5 md:px-2 py-0.5 rounded-lg uppercase tracking-wider shrink-0 shadow-sm">YOU</span>}
         </div>
       </div>
 
       <div className={cn(
         "flex items-center gap-1.5 px-2 md:px-3 py-1 md:py-1.5 rounded-xl transition-colors shrink-0",
-        isUser ? "bg-white border-2 border-[#3CC7F5]/20" : "bg-[#F7F7F7] group-hover:bg-white"
+        isUser ? "bg-white border-2 border-primary/20" : "bg-[#F7F7F7] group-hover:bg-white"
       )}>
-        <Zap className="w-3.5 h-3.5 md:w-4 md:h-4 text-[#3CC7F5] fill-[#3CC7F5]" />
-        <span className={cn("font-black text-sm md:text-base", isUser ? "text-[#3CC7F5]" : "text-[#4B4B4B]")}>{xp}</span>
+        <Zap className="w-3.5 h-3.5 md:w-4 md:h-4 text-primary fill-primary" />
+        <span className={cn("font-black text-sm md:text-base", isUser ? "text-primary" : "text-[#4B4B4B]")}>{xp}</span>
       </div>
     </div>
   );

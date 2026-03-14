@@ -102,12 +102,12 @@ export default function DashboardPage() {
                     <Trophy className="text-white w-6 h-6" />
                  </div>
                  <div className="flex flex-col">
-                    <span className="text-sm font-black text-[#4B4B4B]">
-                      {leagueData?.userLeague?.leagueGroup?.tier ? `${['Bronze', 'Silver', 'Gold', 'Sapphire', 'Ruby', 'Emerald', 'Amethyst', 'Pearl', 'Obsidian', 'Diamond'][leagueData.userLeague.leagueGroup.tier - 1]} League` : 'Join a League'}
-                    </span>
-                    <span className="text-xs font-bold text-[#AFAFAF]">
-                      {leagueData?.leaderboard ? `Rank #${leagueData.leaderboard.findIndex(e => e.userId === userId) + 1} of ${leagueData.leaderboard.length}` : 'Start a lesson to rank!'}
-                    </span>
+                     <span className="text-sm font-black text-[#4B4B4B]">
+                       {leagueData?.userLeague?.leagueGroup?.tier ? `${['Bronze', 'Silver', 'Gold', 'Sapphire', 'Ruby', 'Emerald', 'Amethyst', 'Pearl', 'Obsidian', 'Diamond'][(leagueData.userLeague.leagueGroup as any).tier - 1]} League` : 'Join a League'}
+                     </span>
+                     <span className="text-xs font-bold text-[#AFAFAF]">
+                       {leagueData?.leaderboard ? `Rank #${leagueData.leaderboard.findIndex((e: any) => e.userId === userId) + 1} of ${leagueData.leaderboard.length}` : 'Start a lesson to rank!'}
+                     </span>
                  </div>
               </div>
            </div>
