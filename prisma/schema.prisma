@@ -414,6 +414,7 @@ model UserLeague {
   result         LeagueResult?
 
   @@index([userId, weekKey])
+  @@index([leagueGroupId])
 }
 
 enum LeagueResult {
@@ -431,6 +432,7 @@ model LeagueGroup {
   userLeagues UserLeague[]
 
   @@unique([tier, weekKey, id])
+  @@index([tier, weekKey, memberCount])
 }
 
 model StreakEvent {

@@ -3,6 +3,7 @@ import { createTRPCRouter, protectedProcedure } from "../trpc";
 import { db } from "@/lib/prisma";
 import { getCurrentWeekKey } from "@/lib/gamification";
 import { TRPCError } from "@trpc/server";
+import { seedLeagueGroupWithGhosts } from "@/lib/ghost-engine";
 
 export const leagueRouter = createTRPCRouter({
   getCurrentLeague: protectedProcedure
@@ -52,6 +53,8 @@ export const leagueRouter = createTRPCRouter({
                 memberCount: 0
               }
             });
+            // Seed ghost users for competition
+            await seedLeagueGroupWithGhosts(group.id, tier, tx);
           }
 
           // 4. Join the group
@@ -77,10 +80,13 @@ export const leagueRouter = createTRPCRouter({
         });
       }
 
-      // Fetch the full leaderboard for this group
+      // Fetch the full leaderboard for this group - Optimized with select
       const leaderboard = await db.userLeague.findMany({
         where: { leagueGroupId: userLeague.leagueGroupId },
-        include: {
+        select: {
+          id: true,
+          userId: true,
+          xpEarned: true,
           user: {
             select: {
               id: true,
@@ -92,7 +98,8 @@ export const leagueRouter = createTRPCRouter({
             }
           }
         },
-        orderBy: { xpEarned: 'desc' }
+        orderBy: { xpEarned: 'desc' },
+        take: 30
       });
 
       return {
