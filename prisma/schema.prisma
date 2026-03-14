@@ -82,6 +82,7 @@ model User {
   xpEvents              XpEvent[]
   userBadges            UserBadge[]
   leagueHistory         UserLeague[]
+  userQuests            UserQuest[]
 
   // Dev
   devAuditLog           DevAuditLog[]
@@ -369,6 +370,7 @@ enum XpReason {
   COURSE_COMPLETE
   WEEKLY_STREAK_BONUS
   ADMIN_AWARD
+  QUEST_REWARD
 }
 
 model Badge {
@@ -394,6 +396,43 @@ model UserBadge {
   earnedAt  DateTime @default(now())
 
   @@unique([userId, badgeId])
+}
+
+model DailyQuest {
+  id           String      @id @default(cuid())
+  title        String
+  description  String
+  type         QuestType
+  targetValue  Int
+  xpReward     Int         @default(10)
+  
+  userQuests   UserQuest[]
+  createdAt    DateTime    @default(now())
+}
+
+model UserQuest {
+  id            String      @id @default(cuid())
+  userId        String
+  user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  questId       String
+  quest         DailyQuest  @relation(fields: [questId], references: [id], onDelete: Cascade)
+  
+  currentValue  Int         @default(0)
+  isCompleted   Boolean     @default(false)
+  isClaimed     Boolean     @default(false)
+  dayKey        String      // e.g., "2026-03-14"
+  createdAt     DateTime    @default(now())
+  completedAt   DateTime?
+
+  @@unique([userId, questId, dayKey])
+  @@index([userId, dayKey])
+}
+
+enum QuestType {
+  XP_GAIN
+  LESSON_COMPLETE
+  STREAK_MAINTAIN
+  UNIT_COMPLETE
 }
 
 model Level {

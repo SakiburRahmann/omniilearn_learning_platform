@@ -1,12 +1,13 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { BookOpen, Flame, Heart, Star, Target, Zap, Trophy } from "lucide-react";
+import { BookOpen, Flame, Heart, Star, Target, Zap, Trophy, ChevronRight } from "lucide-react";
 import { api } from "@/utils/trpc";
 import { createClient } from "@/lib/supabase-client";
 import { useState, useEffect } from "react";
 import { UnitSection } from "@/components/dashboard/unit-section";
 import { useRouter } from "next/navigation";
+import { cn } from "@/lib/utils";
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -26,6 +27,10 @@ export default function DashboardPage() {
   });
 
   const { data: leagueData } = api.league.getCurrentLeague.useQuery(undefined, {
+    enabled: !!userId,
+  });
+
+  const { data: quests } = api.quest.getDailyQuests.useQuery(undefined, {
     enabled: !!userId,
   });
 
@@ -112,24 +117,42 @@ export default function DashboardPage() {
               </div>
            </div>
 
-           {/* Daily Quests Mini */}
-           <div className="duo-card p-6 bg-white border-2 border-[#E5E5E5] rounded-2xl shadow-[0_4px_0_0_#E5E5E5]">
-              <h3 className="text-lg font-black text-[#4B4B4B] mb-4 uppercase tracking-wide">Daily Quests</h3>
-              <div className="space-y-4">
-                 <div className="flex items-center gap-3">
-                    <Target className="w-5 h-5 text-[#FF4B4B]" />
-                    <div className="flex-1">
-                       <p className="text-sm font-black text-[#4B4B4B]">Earn 10 XP</p>
-                       <div className="h-2 bg-[#E5E5E5] rounded-full mt-1">
-                          <div className="h-full bg-[#FFC800] w-0" />
-                       </div>
-                    </div>
-                 </div>
-              </div>
-           </div>
+            {/* Daily Quests Mini */}
+            <div 
+              onClick={() => router.push('/quests')}
+              className="duo-card p-6 bg-white border-2 border-[#E5E5E5] rounded-2xl shadow-[0_4px_0_0_#E5E5E5] cursor-pointer hover:bg-[#F7F7F7] transition-all group"
+            >
+               <div className="flex items-center justify-between mb-4">
+                 <h3 className="text-lg font-black text-[#4B4B4B] uppercase tracking-wide">Daily Quests</h3>
+                 <ChevronRight className="w-5 h-5 text-[#AFAFAF] group-hover:text-primary transition-colors" />
+               </div>
+               <div className="space-y-4">
+                  {quests?.slice(0, 3).map((uq: any) => (
+                      <div key={uq.id} className="flex items-center gap-3">
+                         <div className="shrink-0">
+                           {uq.quest.type === 'XP_GAIN' ? <Zap className="w-4 h-4 text-[#3CC7F5] fill-[#3CC7F5]" /> : <Target className="w-4 h-4 text-[#FF4B4B]" />}
+                         </div>
+                         <div className="flex-1 min-w-0">
+                            <p className="text-xs font-black text-[#4B4B4B] truncate">{uq.quest.title}</p>
+                            <div className="h-2 bg-[#E5E5E5] rounded-full mt-1 overflow-hidden">
+                               <div 
+                                 className={cn(
+                                   "h-full transition-all",
+                                   uq.isCompleted ? "bg-[#58CC02]" : "bg-[#FFC800]"
+                                 )}
+                                 style={{ width: `${Math.min((uq.currentValue / uq.quest.targetValue) * 100, 100)}%` }} 
+                               />
+                            </div>
+                         </div>
+                      </div>
+                  ))}
+                  {(!quests || quests.length === 0) && (
+                    <p className="text-xs font-bold text-[#AFAFAF] italic">No active quests today.</p>
+                  )}
+               </div>
+            </div>
         </div>
       </div>
     </div>
   );
 }
-

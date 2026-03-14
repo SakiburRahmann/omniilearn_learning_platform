@@ -5,6 +5,7 @@ import { db } from "@/lib/prisma";
 import { ensureUserSynced } from "@/lib/user-sync";
 import { calculateCurrentHearts, calculateNewStreak } from "@/lib/gamification";
 import { syncUserLeagueXP } from "@/lib/league-sync";
+import { updateQuestProgress } from "@/lib/quest-sync";
 
 export const learningRouter = createTRPCRouter({
   /**
@@ -197,7 +198,10 @@ export const learningRouter = createTRPCRouter({
             }
           }),
           // 6b. Sync XP with Weekly League (optimized within tx)
-          syncUserLeagueXP(dbUserId, input.xpEarned, tx)
+          syncUserLeagueXP(dbUserId, input.xpEarned, tx),
+          // 6c. Sync Daily Quests (XP and Lesson Complete)
+          updateQuestProgress(dbUserId, 'XP_GAIN', input.xpEarned, tx),
+          updateQuestProgress(dbUserId, 'LESSON_COMPLETE', 1, tx)
         ]);
 
         // 3. Unlock next lesson (Sequential but optimized)
