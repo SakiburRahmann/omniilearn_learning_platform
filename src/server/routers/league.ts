@@ -5,6 +5,9 @@ import { getCurrentWeekKey } from "@/lib/gamification";
 import { TRPCError } from "@trpc/server";
 
 export const leagueRouter = createTRPCRouter({
+  /**
+   * League Cohort: Users in the same group of 30
+   */
   getCurrentLeague: protectedProcedure
     .query(async ({ ctx }) => {
       const weekKey = getCurrentWeekKey();
@@ -17,10 +20,9 @@ export const leagueRouter = createTRPCRouter({
         }
       });
 
-      // If user isn't in a league for this week yet, join them
+      // Join if not in a league
       if (!userLeague) {
         userLeague = await db.$transaction(async (tx) => {
-          // 1. Determine tier
           const lastWeek = await tx.userLeague.findFirst({
             where: { userId },
             orderBy: { weekKey: 'desc' },
@@ -34,87 +36,30 @@ export const leagueRouter = createTRPCRouter({
             else tier = lastWeek.leagueGroup.tier;
           }
 
-          // 2. Find an available group in this tier
           let group = await tx.leagueGroup.findFirst({
-            where: { 
-              tier, 
-              weekKey,
-              memberCount: { lt: 30 }
-            }
+            where: { tier, weekKey, memberCount: { lt: 30 } }
           });
 
-          // 3. Create group if none available
           if (!group) {
             group = await tx.leagueGroup.create({
-              data: {
-                tier,
-                weekKey,
-                memberCount: 0
-              }
+              data: { tier, weekKey, memberCount: 0 }
             });
           }
 
-          // 4. Join the group
           const newUserLeague = await tx.userLeague.create({
-            data: {
-              userId,
-              leagueGroupId: group.id,
-              weekKey,
-              xpEarned: 0
-            },
-            include: {
-              leagueGroup: true
-            }
+            data: { userId, leagueGroupId: group.id, weekKey, xpEarned: 0 },
+            include: { leagueGroup: true }
           });
 
-          // 5. Increment member count
           await tx.leagueGroup.update({
             where: { id: group.id },
             data: { memberCount: { increment: 1 } }
           });
 
-          // 6. Recruitment: If group is empty/small, pull in other real users
-          // This ensures the league feels alive with real people immediately
-          const potentialRecruits = await tx.user.findMany({
-            where: {
-              id: { not: userId },
-              status: 'VERIFIED',
-              studentProfile: { isNot: null },
-              leagueHistory: {
-                none: { weekKey: weekKey }
-              }
-            },
-            take: 20,
-            include: { 
-              studentProfile: {
-                select: { totalXp: true }
-              }
-            }
-          });
-
-          if (potentialRecruits.length > 0) {
-            const recruitsData = (potentialRecruits as any[]).map(r => ({
-              userId: r.id,
-              leagueGroupId: group.id,
-              weekKey,
-              xpEarned: Math.floor(Math.random() * (r.studentProfile?.totalXp || 100) * 0.15)
-            }));
-
-            await tx.userLeague.createMany({
-              data: recruitsData
-            });
-
-            await tx.leagueGroup.update({
-              where: { id: group.id },
-              data: { memberCount: { increment: recruitsData.length } }
-            });
-          }
-
           return newUserLeague;
         });
       }
 
-      // Fetch the full leaderboard for this group - Optimized with select
       const leaderboard = await db.userLeague.findMany({
         where: { leagueGroupId: userLeague.leagueGroupId },
         select: {
@@ -126,9 +71,7 @@ export const leagueRouter = createTRPCRouter({
               id: true,
               firstName: true,
               lastName: true,
-              studentProfile: {
-                select: { avatarConfig: true }
-              }
+              studentProfile: { select: { avatarConfig: true } }
             }
           }
         },
@@ -136,42 +79,128 @@ export const leagueRouter = createTRPCRouter({
         take: 30
       });
 
+      // Calculate Rank Info
+      const rank = leaderboard.findIndex(e => e.userId === userId) + 1;
+
       return {
         userLeague,
         leaderboard,
-        weekKey
+        weekKey,
+        personalRank: rank
       };
     }),
 
-  getGlobalLeaderboard: protectedProcedure
-    .query(async () => {
-      // Fetch top 50 users by total XP platform-wide
-      const topUsers = await db.studentProfile.findMany({
-        orderBy: { totalXp: 'desc' },
+  /**
+   * Global This Week: Top 50 by weekly XP
+   */
+  getThisWeekLeaderboard: protectedProcedure
+    .query(async ({ ctx }) => {
+      const weekKey = getCurrentWeekKey();
+      const userId = ctx.user.id;
+
+      const topUsers = await db.userLeague.findMany({
+        where: { weekKey },
+        orderBy: { xpEarned: 'desc' },
         take: 50,
         select: {
-          totalXp: true,
+          userId: true,
+          xpEarned: true,
           user: {
             select: {
-              id: true,
               firstName: true,
               lastName: true,
-              studentProfile: {
-                select: { avatarConfig: true }
-              }
+              studentProfile: { select: { avatarConfig: true } }
             }
           }
         }
       });
 
+      // Calculate personal rank if not in top 50
+      let personalRank = topUsers.findIndex(u => u.userId === userId) + 1;
+      let personalXp = 0;
+
+      if (personalRank === 0) {
+        const userEntry = await db.userLeague.findFirst({
+          where: { userId, weekKey },
+          select: { xpEarned: true }
+        });
+        personalXp = userEntry?.xpEarned || 0;
+        
+        // Count users with more XP
+        const countHigher = await db.userLeague.count({
+          where: { weekKey, xpEarned: { gt: personalXp } }
+        });
+        personalRank = countHigher + 1;
+      } else {
+        personalXp = topUsers[personalRank - 1].xpEarned;
+      }
+
       return {
-        topUsers: topUsers.map(profile => ({
-          userId: profile.user.id,
-          firstName: profile.user.firstName,
-          lastName: profile.user.lastName,
-          avatarConfig: profile.user.studentProfile?.avatarConfig,
-          xp: profile.totalXp
-        }))
+        topUsers: topUsers.map((u, i) => ({
+          userId: u.userId,
+          firstName: u.user.firstName,
+          lastName: u.user.lastName,
+          avatarConfig: (u.user.studentProfile as any)?.avatarConfig,
+          xp: u.xpEarned,
+          rank: i + 1
+        })),
+        personalRank,
+        personalXp
+      };
+    }),
+
+  /**
+   * All Time: Top 50 by total XP
+   */
+  getAllTimeLeaderboard: protectedProcedure
+    .query(async ({ ctx }) => {
+      const userId = ctx.user.id;
+
+      const topProfiles = await db.studentProfile.findMany({
+        orderBy: { totalXp: 'desc' },
+        take: 50,
+        select: {
+          userId: true,
+          totalXp: true,
+          user: {
+            select: {
+              firstName: true,
+              lastName: true
+            }
+          },
+          avatarConfig: true
+        }
+      });
+
+      let personalRank = topProfiles.findIndex(p => p.userId === userId) + 1;
+      let personalXp = 0;
+
+      if (personalRank === 0) {
+        const userProfile = await db.studentProfile.findUnique({
+          where: { userId },
+          select: { totalXp: true }
+        });
+        personalXp = userProfile?.totalXp || 0;
+
+        const countHigher = await db.studentProfile.count({
+          where: { totalXp: { gt: personalXp } }
+        });
+        personalRank = countHigher + 1;
+      } else {
+        personalXp = topProfiles[personalRank - 1].totalXp;
+      }
+
+      return {
+        topUsers: topProfiles.map((p, i) => ({
+          userId: p.userId,
+          firstName: p.user.firstName,
+          lastName: p.user.lastName,
+          avatarConfig: (p as any).avatarConfig,
+          xp: p.totalXp,
+          rank: i + 1
+        })),
+        personalRank,
+        personalXp
       };
     })
 });
