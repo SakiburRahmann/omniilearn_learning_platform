@@ -31,23 +31,6 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-0 pb-12">
-      {/* Header Info Bar */}
-      <section className="flex items-center justify-between gap-6 px-4 py-4 bg-white border-b-2 border-[#E5E5E5] sticky top-0 z-40">
-        <div className="flex items-center gap-8 max-w-4xl mx-auto w-full">
-          <div className="flex items-center gap-2 group cursor-pointer">
-            <Flame className="w-6 h-6 text-[#FF9600]" />
-            <span className="font-black text-[#AFAFAF] group-hover:text-[#FF9600] transition-colors">0</span>
-          </div>
-          <div className="flex items-center gap-2 group cursor-pointer">
-            <Star className="w-6 h-6 text-[#FFC800]" />
-            <span className="font-black text-[#FFC800]">50</span>
-          </div>
-          <div className="flex items-center gap-2 group cursor-pointer">
-            <Heart className="w-6 h-6 text-[#FF4B4B]" />
-            <span className="font-black text-[#FF4B4B]">5</span>
-          </div>
-        </div>
-      </section>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-5xl mx-auto px-4 pt-8">
         {/* Main Learning Path */}

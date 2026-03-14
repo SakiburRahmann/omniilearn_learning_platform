@@ -120,6 +120,10 @@ export const userRouter = createTRPCRouter({
         const safeAvatarConfig = user.studentProfile.avatarConfig ? 
           JSON.parse(JSON.stringify(user.studentProfile.avatarConfig)) : null;
         
+        const isStreakActiveToday = user.studentProfile.streakLastUpdated ? 
+          new Date(user.studentProfile.streakLastUpdated).toDateString() === new Date().toDateString() : 
+          false;
+
         return {
           id: user.id,
           firstName: user.firstName,
@@ -132,6 +136,7 @@ export const userRouter = createTRPCRouter({
             totalXp: user.studentProfile.totalXp,
             currentStreak: user.studentProfile.currentStreak,
             longestStreak: user.studentProfile.longestStreak,
+            isStreakActiveToday,
             heartsCurrent: current,
             nextRegenMs: nextRegenMs
           }
