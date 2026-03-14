@@ -2,7 +2,7 @@
 
 import { api } from "@/utils/trpc";
 import { cn } from "@/lib/utils";
-import { Trophy, Shield, Timer, Flame, Medal, Award, Globe, Users, Calendar } from "lucide-react";
+import { Trophy, Shield, Timer, Zap, Medal, Award, Globe, Users, Calendar } from "lucide-react";
 import { ModularAvatar, DEFAULT_AVATAR } from "@/components/avatar/modular-avatar";
 import { getLeagueTierName, LEAGUE_TIERS } from "@/lib/gamification";
 import { useEffect, useState } from "react";
@@ -66,13 +66,13 @@ export default function LeaderboardsPage() {
   const personalInfo = getPersonalRankInfo();
 
   return (
-    <div className="max-w-6xl mx-auto px-4 md:px-8 pb-32">
+    <div className="max-w-6xl mx-auto px-4 md:px-8 pb-32 w-full">
       {/* Centered Header */}
-      <div className="flex flex-col items-center text-center gap-6 mb-12 pt-8">
-        <h1 className="text-4xl md:text-5xl font-black text-[#4B4B4B] tracking-tight">Leaderboards</h1>
+      <div className="flex flex-col items-center justify-center text-center gap-6 mb-12 pt-8 w-full">
+        <h1 className="text-4xl md:text-5xl font-black text-[#4B4B4B] tracking-tight w-full">Leaderboards</h1>
         
         {/* Responsive Tab Switcher */}
-        <div className="flex flex-wrap justify-center bg-[#F7F7F7] p-1.5 rounded-2xl w-full max-w-lg border-2 border-[#E5E5E5] gap-1">
+        <div className="flex flex-wrap justify-center bg-[#F7F7F7] p-1.5 rounded-2xl w-full max-w-xl border-2 border-[#E5E5E5] gap-1 shadow-sm">
           <TabButton active={activeTab === "league"} onClick={() => setActiveTab("league")} icon={Users} label="League" />
           <TabButton active={activeTab === "week"} onClick={() => setActiveTab("week")} icon={Calendar} label="This Week" />
           <TabButton active={activeTab === "all"} onClick={() => setActiveTab("all")} icon={Globe} label="All Time" />
@@ -129,7 +129,7 @@ export default function LeaderboardsPage() {
                   <span className="text-xs font-bold text-[#AFAFAF] uppercase tracking-widest">Keep going to reach the top!</span>
                 </div>
                 <div className="flex items-center gap-1.5 bg-primary/10 px-3 py-1 rounded-xl">
-                  <Flame className="w-4 h-4 text-primary fill-primary" />
+                  <Zap className="w-4 h-4 text-primary fill-primary" />
                   <span className="font-black text-primary">{personalInfo.xp}</span>
                 </div>
               </div>
@@ -181,17 +181,17 @@ function TabButton({ active, onClick, icon: Icon, label }: { active: boolean, on
 function LeaderboardRow({ rank, entry, isUser, xp }: { rank: number, entry: any, isUser: boolean, xp: number }) {
   return (
     <div className={cn(
-      "flex items-center gap-4 px-6 py-4 transition-all group border-l-4",
+      "flex items-center gap-3 md:gap-4 px-4 md:px-6 py-4 transition-all group border-l-4",
       isUser ? "bg-primary/5 border-l-primary" : "hover:bg-[#F7F7F7] border-l-transparent"
     )}>
-      <div className="w-8 flex justify-center shrink-0">
-        {rank === 1 ? <Medal className="w-7 h-7 text-[#FFD700] drop-shadow-sm" /> : 
-         rank === 2 ? <Medal className="w-7 h-7 text-[#C0C0C0] drop-shadow-sm" /> : 
-         rank === 3 ? <Medal className="w-7 h-7 text-[#CD7F32] drop-shadow-sm" /> : 
-         <span className={cn("font-black text-lg", rank <= 10 ? "text-accent" : "text-[#AFAFAF]")}>{rank}</span>}
+      <div className="w-6 md:w-8 flex justify-center shrink-0">
+        {rank === 1 ? <Medal className="w-6 h-6 md:w-7 md:h-7 text-[#FFD700] drop-shadow-sm" /> : 
+         rank === 2 ? <Medal className="w-6 h-6 md:w-7 md:h-7 text-[#C0C0C0] drop-shadow-sm" /> : 
+         rank === 3 ? <Medal className="w-6 h-6 md:w-7 md:h-7 text-[#CD7F32] drop-shadow-sm" /> : 
+         <span className={cn("font-black text-base md:text-lg", rank <= 10 ? "text-accent" : "text-[#AFAFAF]")}>{rank}</span>}
       </div>
 
-      <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-[#E5E5E5] bg-white group-hover:border-primary transition-all shrink-0">
+      <div className="w-10 h-10 md:w-12 md:h-12 rounded-full overflow-hidden border-2 border-[#E5E5E5] bg-white group-hover:border-primary transition-all shrink-0">
         <ModularAvatar 
           config={((entry.user?.studentProfile || entry).avatarConfig as any) || DEFAULT_AVATAR} 
           size={48} 
@@ -201,16 +201,16 @@ function LeaderboardRow({ rank, entry, isUser, xp }: { rank: number, entry: any,
 
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2">
-          <span className={cn("font-black text-lg truncate", isUser ? "text-primary" : "text-[#4B4B4B]")}>
+          <span className={cn("font-black text-sm md:text-lg truncate", isUser ? "text-primary" : "text-[#4B4B4B]")}>
             {(entry.user?.firstName || entry.firstName)} {(entry.user?.lastName || entry.lastName)}
           </span>
-          {isUser && <span className="bg-primary text-white text-[10px] font-black px-1.5 py-0.5 rounded-md uppercase tracking-tighter">You</span>}
+          {isUser && <span className="bg-primary text-white text-[8px] md:text-[10px] font-black px-1 md:px-1.5 py-0.5 rounded-md uppercase tracking-tighter shrink-0">You</span>}
         </div>
       </div>
 
-      <div className="flex items-center gap-1.5 bg-[#F7F7F7] px-3 py-1.5 rounded-xl group-hover:bg-white transition-colors shrink-0">
-        <Flame className="w-4 h-4 text-[#FF9600] fill-[#FF9600]" />
-        <span className="font-black text-[#4B4B4B]">{xp}</span>
+      <div className="flex items-center gap-1.5 bg-[#F7F7F7] px-2 md:px-3 py-1 md:py-1.5 rounded-xl group-hover:bg-white transition-colors shrink-0">
+        <Zap className="w-3.5 h-3.5 md:w-4 md:h-4 text-[#FF9600] fill-[#FF9600]" />
+        <span className="font-black text-sm md:text-base text-[#4B4B4B]">{xp}</span>
       </div>
     </div>
   );

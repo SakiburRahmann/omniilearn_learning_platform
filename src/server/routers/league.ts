@@ -23,6 +23,7 @@ export const leagueRouter = createTRPCRouter({
       // Join if not in a league
       if (!userLeague) {
         userLeague = await db.$transaction(async (tx) => {
+          // 1. Get tier
           const lastWeek = await tx.userLeague.findFirst({
             where: { userId },
             orderBy: { weekKey: 'desc' },
@@ -36,30 +37,37 @@ export const leagueRouter = createTRPCRouter({
             else tier = lastWeek.leagueGroup.tier;
           }
 
+          // 2. Find a group that isn't full
           let group = await tx.leagueGroup.findFirst({
             where: { tier, weekKey, memberCount: { lt: 30 } }
           });
 
+          // 3. Create group if none found
           if (!group) {
             group = await tx.leagueGroup.create({
               data: { tier, weekKey, memberCount: 0 }
             });
           }
 
-          const newUserLeague = await tx.userLeague.create({
-            data: { userId, leagueGroupId: group.id, weekKey, xpEarned: 0 },
-            include: { leagueGroup: true }
-          });
-
-          await tx.leagueGroup.update({
-            where: { id: group.id },
-            data: { memberCount: { increment: 1 } }
-          });
+          // 4. Create session and update group count
+          const [newUserLeague] = await Promise.all([
+            tx.userLeague.create({
+              data: { userId, leagueGroupId: group.id, weekKey, xpEarned: 0 },
+              include: { leagueGroup: true }
+            }),
+            tx.leagueGroup.update({
+              where: { id: group.id },
+              data: { memberCount: { increment: 1 } }
+            })
+          ]);
 
           return newUserLeague;
+        }, {
+          isolationLevel: 'Serializable' // Ensure atomic join
         });
       }
 
+      // Fetch the full leaderboard for this group - FAST query
       const leaderboard = await db.userLeague.findMany({
         where: { leagueGroupId: userLeague.leagueGroupId },
         select: {
@@ -86,7 +94,7 @@ export const leagueRouter = createTRPCRouter({
         userLeague,
         leaderboard,
         weekKey,
-        personalRank: rank
+        personalRank: rank || (leaderboard.length + 1)
       };
     }),
 
