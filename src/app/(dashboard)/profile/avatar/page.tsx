@@ -24,12 +24,14 @@ const EYES = [
   { id: "round", label: "Round" },
   { id: "smiling", label: "Smiling" },
   { id: "eyesShadow", label: "Shadow" },
+  { id: "smilingShadow", label: "Smiling Shadow" },
 ];
 const MOUTHS = [
   { id: "smile", label: "Smile" },
   { id: "smirk", label: "Smirk" },
   { id: "laughing", label: "Laughing" },
   { id: "pucker", label: "Pucker" },
+  { id: "frown", label: "Frown" },
   { id: "nervous", label: "Nervous" },
   { id: "sad", label: "Sad" },
   { id: "surprised", label: "Surprise" },
@@ -38,6 +40,8 @@ const EYEBROWS = [
   { id: "eyebrows", label: "Normal" },
   { id: "up", label: "Arched Up" },
   { id: "down", label: "Arched Down" },
+  { id: "eyelashesUp", label: "Eyelashes Up" },
+  { id: "eyelashesDown", label: "Eyelashes Down" },
 ];
 const NOSES = [
   { id: "curve", label: "Curved" },
@@ -196,11 +200,26 @@ export default function AvatarEditorPage() {
                 </div>
                 <div>
                   <h3 className="text-sm font-black text-[#4B4B4B] mb-4">Eyes</h3>
-                  <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
+                  <div className="grid grid-cols-3 sm:grid-cols-4 gap-3 mb-4">
                     {EYES.map((s) => (
                       <button key={s.id} onClick={() => update({ eyes: s.id })} className={cn("p-3 rounded-2xl border-2 font-bold text-sm hover:bg-gray-50", config.eyes === s.id ? "border-primary text-primary bg-primary/5" : "border-[#E5E5E5] text-[#AFAFAF]")}>{s.label}</button>
                     ))}
                   </div>
+                  {(config.eyes === "eyesShadow" || config.eyes === "smilingShadow") && (
+                    <div className="animate-in fade-in slide-in-from-top-2 duration-300">
+                      <h4 className="text-xs font-black text-[#AFAFAF] uppercase mb-3">Eye Shadow Color</h4>
+                      <div className="grid grid-cols-6 sm:grid-cols-10 gap-3">
+                        {BG_COLORS.map((color) => (
+                          <button
+                            key={color}
+                            onClick={() => update({ eyeShadowColor: color })}
+                            className={cn("aspect-square rounded-full border-2 transition-all hover:scale-110", config.eyeShadowColor === color ? "border-primary scale-110" : "border-transparent")}
+                            style={{ backgroundColor: `#${color}` }}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
                 <div>
                   <h3 className="text-sm font-black text-[#4B4B4B] mb-4">Eyebrows</h3>
