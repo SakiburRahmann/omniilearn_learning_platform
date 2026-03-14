@@ -1,15 +1,50 @@
 "use client";
 
 import { api } from "@/utils/trpc";
-import { Target, Zap, Award, Flame, CheckCircle2, Gift } from "lucide-react";
+import { Target, Zap, Award, Flame, CheckCircle2, Gift, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { useState, useCallback } from "react";
+import confetti from "canvas-confetti";
+
+function fireConfetti() {
+  const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 9999 };
+  const fire = (particleRatio: number, opts: confetti.Options) => {
+    confetti({
+      ...defaults,
+      ...opts,
+      particleCount: Math.floor(200 * particleRatio),
+    });
+  };
+  fire(0.25, { spread: 26, startVelocity: 55 });
+  fire(0.2, { spread: 60 });
+  fire(0.35, { spread: 100, decay: 0.91, scalar: 0.8 });
+  fire(0.1, { spread: 120, startVelocity: 25, decay: 0.92, scalar: 1.2 });
+  fire(0.1, { spread: 120, startVelocity: 45 });
+}
 
 export default function QuestsPage() {
   const { data: quests, isLoading, refetch } = api.quest.getDailyQuests.useQuery();
+  const [lastReward, setLastReward] = useState<{ xp: number; questTitle: string } | null>(null);
+
   const claimMutation = api.quest.claimReward.useMutation({
-    onSuccess: (data) => {
-      toast.success(`Reward claimed! +${data.xpEarned} XP`);
+    onSuccess: (data, variables) => {
+      const claimedQuest = quests?.find((q: any) => q.id === variables.userQuestId);
+      const questTitle = claimedQuest?.quest?.title || "Quest";
+
+      // 1. Fire confetti
+      fireConfetti();
+
+      // 2. Show inline reward banner
+      setLastReward({ xp: data.xpEarned, questTitle });
+      setTimeout(() => setLastReward(null), 5000);
+
+      // 3. Show toast
+      toast.success(`🎉 +${data.xpEarned} XP earned from "${questTitle}"!`, {
+        duration: 4000,
+      });
+
+      // 4. Refetch quest state
       refetch();
     },
     onError: (error) => {
@@ -17,12 +52,32 @@ export default function QuestsPage() {
     }
   });
 
+  const handleClaim = useCallback((userQuestId: string) => {
+    claimMutation.mutate({ userQuestId });
+  }, [claimMutation]);
+
   return (
     <div className="max-w-3xl mx-auto px-4 py-8 md:py-12">
       <div className="flex flex-col gap-2 mb-8 md:mb-12 text-center md:text-left">
         <h1 className="text-3xl md:text-4xl font-black text-[#4B4B4B] tracking-tight">Daily Quests</h1>
         <p className="text-[#AFAFAF] font-bold text-base md:text-lg">Complete challenges to earn extra XP and rewards!</p>
       </div>
+
+      {/* Reward celebration banner */}
+      {lastReward && (
+        <div className="mb-6 p-5 bg-gradient-to-r from-[#58CC02] to-[#46A302] rounded-2xl shadow-[0_4px_0_0_#3a8a02] text-white text-center animate-[slideDown_0.4s_ease-out]">
+          <div className="flex items-center justify-center gap-3">
+            <Sparkles className="w-6 h-6 animate-pulse" />
+            <span className="font-black text-lg uppercase tracking-wide">
+              +{lastReward.xp} XP Earned!
+            </span>
+            <Sparkles className="w-6 h-6 animate-pulse" />
+          </div>
+          <p className="text-white/80 font-bold text-sm mt-1">
+            from &quot;{lastReward.questTitle}&quot;
+          </p>
+        </div>
+      )}
 
       <div className="space-y-4 md:space-y-6">
         {isLoading ? (
@@ -35,7 +90,7 @@ export default function QuestsPage() {
               key={uq.id} 
               uq={uq} 
               isClaiming={claimMutation.isPending && claimMutation.variables?.userQuestId === uq.id}
-              onClaim={() => claimMutation.mutate({ userQuestId: uq.id })}
+              onClaim={() => handleClaim(uq.id)}
             />
           ))
         ) : (
@@ -46,7 +101,6 @@ export default function QuestsPage() {
         )}
       </div>
 
-      {/* Persistence Note */}
       <p className="mt-8 text-center text-[#AFAFAF] text-xs font-bold uppercase tracking-widest leading-relaxed">
         Quests reset daily at UTC midnight. <br className="md:hidden" /> Complete them early to maximize your rewards!
       </p>
@@ -54,7 +108,7 @@ export default function QuestsPage() {
   );
 }
 
-function QuestRow({ uq, isClaiming, onClaim }: { uq: any, isClaiming: boolean, onClaim: () => void }) {
+function QuestRow({ uq, isClaiming, onClaim }: { uq: any; isClaiming: boolean; onClaim: () => void }) {
   const quest = uq.quest;
   const progress = Math.min((uq.currentValue / quest.targetValue) * 100, 100);
   const isCompleted = uq.isCompleted;
@@ -103,7 +157,7 @@ function QuestRow({ uq, isClaiming, onClaim }: { uq: any, isClaiming: boolean, o
 
       <div className="shrink-0 w-full md:w-auto">
         {isClaimed ? (
-          <div className="flex items-center justify-center md:justify-start gap-2 px-6 py-3 text-[#58CC02] font-black uppercase tracking-widest text-sm italic">
+          <div className="flex items-center justify-center md:justify-start gap-2 px-6 py-3 text-[#58CC02] font-black uppercase tracking-widest text-sm">
             <CheckCircle2 className="w-5 h-5" />
             Claimed
           </div>
@@ -111,12 +165,14 @@ function QuestRow({ uq, isClaiming, onClaim }: { uq: any, isClaiming: boolean, o
           <button
             onClick={onClaim}
             disabled={isClaiming}
-            className="w-full md:w-auto px-10 py-4 bg-[#58CC02] text-white font-black rounded-2xl shadow-[0_4px_0_0_#46A302] transition-all hover:scale-[1.02] active:scale-95 text-sm uppercase tracking-widest disabled:opacity-50"
+            className="w-full md:w-auto px-10 py-4 bg-[#58CC02] text-white font-black rounded-2xl shadow-[0_4px_0_0_#46A302] transition-all hover:scale-[1.02] hover:brightness-110 active:scale-95 active:shadow-none text-sm uppercase tracking-widest disabled:opacity-50 flex items-center justify-center gap-2"
           >
-            {isClaiming ? "Claiming..." : "Claim Reward"}
+            <Gift className="w-5 h-5" />
+            {isClaiming ? "Claiming..." : `Claim +${quest.xpReward} XP`}
           </button>
         ) : (
           <div className="flex items-center justify-center md:justify-start gap-2 px-6 py-3 bg-[#F7F7F7] text-[#AFAFAF] font-black rounded-2xl border-2 border-[#E5E5E5] text-xs uppercase tracking-widest min-w-[160px]">
+            <Zap className="w-4 h-4" />
             +{quest.xpReward} XP Reward
           </div>
         )}

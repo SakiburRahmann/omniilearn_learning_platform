@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Nunito } from "next/font/google";
 import "./globals.css";
 import { TRPCProvider } from "@/components/providers/trpc-provider";
+import { Toaster } from "sonner";
 
 const nunito = Nunito({
   subsets: ["latin"],
@@ -25,6 +26,17 @@ export default function RootLayout({
         className={`${nunito.className} antialiased`}
       >
         <TRPCProvider>{children}</TRPCProvider>
+        <Toaster
+          position="top-center"
+          richColors
+          toastOptions={{
+            style: {
+              fontFamily: "var(--font-nunito), sans-serif",
+              fontWeight: 800,
+              borderRadius: "1rem",
+            },
+          }}
+        />
       </body>
     </html>
   );
