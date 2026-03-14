@@ -9,6 +9,8 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@dicebear/collection": "^9.4.0",
+    "@dicebear/core": "^9.4.0",
     "@prisma/adapter-pg": "^7.5.0",
     "@prisma/client": "^7.4.1",
     "@supabase/ssr": "^0.5.2",

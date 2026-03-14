@@ -1,14 +1,47 @@
 "use client";
 
-import { User } from "lucide-react";
-import Image from "next/image";
+import { useMemo } from "react";
+import { createAvatar } from "@dicebear/core";
+import { micah } from "@dicebear/collection";
 
-export interface AvatarConfig {
-  avatarUrl?: string; // The .glb 3D model URL
-  pngUrl?: string;    // The 2D render URL
-}
+export type MicahOptions = {
+  baseColor?: string;
+  earringColor?: string;
+  earrings?: string;
+  earringsProbability?: number;
+  eyeShadowColor?: string;
+  eyebrows?: string;
+  eyebrowsColor?: string;
+  eyes?: string;
+  facialHair?: string;
+  facialHairColor?: string;
+  facialHairProbability?: number;
+  glasses?: string;
+  glassesColor?: string;
+  glassesProbability?: number;
+  hair?: string;
+  hairColor?: string;
+  hairProbability?: number;
+  mouth?: string;
+  mouthColor?: string;
+  nose?: string;
+  shirt?: string;
+  shirtColor?: string;
+  backgroundColor?: string;
+};
 
-export const DEFAULT_AVATAR: AvatarConfig = {};
+export const DEFAULT_AVATAR: MicahOptions = {
+  baseColor: "f9c9b6",
+  hair: "fonze",
+  hairColor: "000000",
+  shirt: "collared",
+  shirtColor: "9287ff",
+  eyes: "eyes",
+  eyebrows: "up",
+  mouth: "smile",
+  nose: "pointed",
+  backgroundColor: "e5e5e5",
+};
 
 interface ModularAvatarProps {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -24,45 +57,93 @@ export function ModularAvatar({
   className,
   showBackground = true,
 }: ModularAvatarProps) {
-  
-  if (config?.pngUrl) {
-    return (
-      <div 
-        className={className} 
-        style={{ 
-          width: size, 
-          height: size, 
-          backgroundColor: showBackground ? '#E5E5E5' : 'transparent',
-          position: 'relative',
-          overflow: 'hidden'
-        }}
-      >
-        <Image 
-          src={config.pngUrl} 
-          alt="User Avatar" 
-          fill
-          sizes={`${size}px`}
-          className="object-cover"
-          unoptimized // The RPM CDN is already optimized
-        />
-      </div>
-    );
-  }
+  const avatarDataUri = useMemo(() => {
+    const isConfigEmpty = !config || Object.keys(config).length === 0;
+    // Overwrite the legacy RPM configs containing avatarUrl
+    const hasOldRpmConfig = config?.avatarUrl;
+    
+    let activeConfig: MicahOptions;
+    if (isConfigEmpty || hasOldRpmConfig) {
+      activeConfig = DEFAULT_AVATAR;
+    } else {
+      activeConfig = config as MicahOptions;
+    }
+    
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const dicebearOptions: Record<string, any> = {
+      seed: "OmniiBuilder", 
+    };
 
-  // Fallback UI
+    if (showBackground) {
+      const bg = activeConfig.backgroundColor || DEFAULT_AVATAR.backgroundColor;
+      dicebearOptions.backgroundColor = [bg?.replace("#", "") || "e5e5e5"];
+    } else {
+      dicebearOptions.backgroundColor = ["transparent"];
+    }
+
+    // Convert strings to single-element arrays per the DiceBear v9 standard API
+    for (const [key, rawValue] of Object.entries(activeConfig)) {
+      if (key === "backgroundColor") continue;
+      
+      if (rawValue !== undefined && rawValue !== null) {
+        if (typeof rawValue === "number") {
+          dicebearOptions[key] = rawValue;
+        } else if (typeof rawValue === "string") {
+          // Remove hash for colors
+          dicebearOptions[key] = [rawValue.replace("#", "")];
+        }
+      }
+    }
+
+    // Force probabilities to ensure optional accessories actually render
+    if (activeConfig.earrings && activeConfig.earrings !== "none") {
+      dicebearOptions.earringsProbability = 100;
+    } else {
+      dicebearOptions.earringsProbability = 0;
+    }
+    
+    if (activeConfig.facialHair && activeConfig.facialHair !== "none") {
+      dicebearOptions.facialHairProbability = 100;
+    } else {
+      dicebearOptions.facialHairProbability = 0;
+    }
+    
+    if (activeConfig.glasses && activeConfig.glasses !== "none") {
+      dicebearOptions.glassesProbability = 100;
+    } else {
+      dicebearOptions.glassesProbability = 0;
+    }
+
+    if (activeConfig.hair && activeConfig.hair !== "none") {
+      dicebearOptions.hairProbability = 100;
+    } else {
+      dicebearOptions.hairProbability = 0;
+    }
+
+    const avatar = createAvatar(micah, dicebearOptions);
+    return avatar.toDataUri();
+  }, [config, showBackground]);
+
   return (
     <div 
       className={className} 
       style={{ 
         width: size, 
         height: size, 
-        backgroundColor: showBackground ? '#E5E5E5' : 'transparent',
+        position: 'relative',
+        overflow: 'hidden',
         display: 'flex',
         alignItems: 'center',
-        justifyContent: 'center'
+        justifyContent: 'center',
+        borderRadius: 'inherit'
       }}
     >
-      <User size={size * 0.5} className="text-[#AFAFAF]" />
+      {/* Render raw img block for instantaneous client rendering. Avoids Next/Image base64 layout bounds */}
+      <img 
+        src={avatarDataUri} 
+        alt="User Avatar" 
+        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+      />
     </div>
   );
 }
