@@ -413,8 +413,10 @@ model UserLeague {
   finalRank      Int?
   result         LeagueResult?
 
+  @@unique([userId, weekKey])
   @@index([userId, weekKey])
-  @@index([leagueGroupId])
+  @@index([leagueGroupId, xpEarned(sort: Desc)])
+  @@index([weekKey, xpEarned(sort: Desc)])
 }
 
 enum LeagueResult {

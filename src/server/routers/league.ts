@@ -3,6 +3,7 @@ import { createTRPCRouter, protectedProcedure } from "../trpc";
 import { db } from "@/lib/prisma";
 import { getCurrentWeekKey } from "@/lib/gamification";
 import { TRPCError } from "@trpc/server";
+import { ensureUserSynced } from "@/lib/user-sync";
 
 export const leagueRouter = createTRPCRouter({
   /**
@@ -11,7 +12,9 @@ export const leagueRouter = createTRPCRouter({
   getCurrentLeague: protectedProcedure
     .query(async ({ ctx }) => {
       const weekKey = getCurrentWeekKey();
-      const userId = ctx.user.id;
+      // ALWAYS sync user to ensure we use the correct DB ID (cuid vs uuid)
+      const user = await ensureUserSynced(ctx.user);
+      const userId = user.id;
 
       let userLeague = await db.userLeague.findFirst({
         where: { userId, weekKey },
@@ -23,51 +26,55 @@ export const leagueRouter = createTRPCRouter({
       // Join if not in a league
       if (!userLeague) {
         userLeague = await db.$transaction(async (tx) => {
-          // 1. Get tier
-          const lastWeek = await tx.userLeague.findFirst({
+          // Double check inside tx for concurrent hits
+          const existing = await tx.userLeague.findFirst({
+             where: { userId, weekKey },
+             include: { leagueGroup: true }
+          });
+          if (existing) return existing;
+
+          const lastWeeksEntry = await tx.userLeague.findFirst({
             where: { userId },
             orderBy: { weekKey: 'desc' },
             include: { leagueGroup: true }
           });
 
           let tier = 1;
-          if (lastWeek) {
-            if (lastWeek.result === 'PROMOTED') tier = Math.min(10, lastWeek.leagueGroup.tier + 1);
-            else if (lastWeek.result === 'DEMOTED') tier = Math.max(1, lastWeek.leagueGroup.tier - 1);
-            else tier = lastWeek.leagueGroup.tier;
+          if (lastWeeksEntry) {
+            if (lastWeeksEntry.result === 'PROMOTED') tier = Math.min(10, (lastWeeksEntry.leagueGroup?.tier || 1) + 1);
+            else if (lastWeeksEntry.result === 'DEMOTED') tier = Math.max(1, (lastWeeksEntry.leagueGroup?.tier || 1) - 1);
+            else tier = lastWeeksEntry.leagueGroup?.tier || 1;
           }
 
-          // 2. Find a group that isn't full
           let group = await tx.leagueGroup.findFirst({
             where: { tier, weekKey, memberCount: { lt: 30 } }
           });
 
-          // 3. Create group if none found
           if (!group) {
             group = await tx.leagueGroup.create({
               data: { tier, weekKey, memberCount: 0 }
             });
           }
 
-          // 4. Create session and update group count
-          const [newUserLeague] = await Promise.all([
-            tx.userLeague.create({
-              data: { userId, leagueGroupId: group.id, weekKey, xpEarned: 0 },
-              include: { leagueGroup: true }
-            }),
-            tx.leagueGroup.update({
-              where: { id: group.id },
-              data: { memberCount: { increment: 1 } }
-            })
-          ]);
+          const joined = await tx.userLeague.create({
+            data: { userId, leagueGroupId: group.id, weekKey, xpEarned: 0 },
+            include: { leagueGroup: true }
+          });
 
-          return newUserLeague;
-        }, {
-          isolationLevel: 'Serializable' // Ensure atomic join
-        });
+          await tx.leagueGroup.update({
+            where: { id: group.id },
+            data: { memberCount: { increment: 1 } }
+          });
+
+          return joined;
+        }) as any;
       }
 
-      // Fetch the full leaderboard for this group - FAST query
+      if (!userLeague) {
+        throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Failed to join league" });
+      }
+
+      // Fetch the full leaderboard for this group - FAST query with the new index
       const leaderboard = await db.userLeague.findMany({
         where: { leagueGroupId: userLeague.leagueGroupId },
         select: {
@@ -94,7 +101,8 @@ export const leagueRouter = createTRPCRouter({
         userLeague,
         leaderboard,
         weekKey,
-        personalRank: rank || (leaderboard.length + 1)
+        personalRank: rank || (leaderboard.length + 1),
+        dbUserId: userId
       };
     }),
 
@@ -104,7 +112,8 @@ export const leagueRouter = createTRPCRouter({
   getThisWeekLeaderboard: protectedProcedure
     .query(async ({ ctx }) => {
       const weekKey = getCurrentWeekKey();
-      const userId = ctx.user.id;
+      const user = await ensureUserSynced(ctx.user);
+      const userId = user.id;
 
       const topUsers = await db.userLeague.findMany({
         where: { weekKey },
@@ -153,7 +162,8 @@ export const leagueRouter = createTRPCRouter({
           rank: i + 1
         })),
         personalRank,
-        personalXp
+        personalXp,
+        dbUserId: userId
       };
     }),
 
@@ -162,7 +172,8 @@ export const leagueRouter = createTRPCRouter({
    */
   getAllTimeLeaderboard: protectedProcedure
     .query(async ({ ctx }) => {
-      const userId = ctx.user.id;
+      const user = await ensureUserSynced(ctx.user);
+      const userId = user.id;
 
       const topProfiles = await db.studentProfile.findMany({
         orderBy: { totalXp: 'desc' },
@@ -208,7 +219,8 @@ export const leagueRouter = createTRPCRouter({
           rank: i + 1
         })),
         personalRank,
-        personalXp
+        personalXp,
+        dbUserId: userId
       };
     })
 });
