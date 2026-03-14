@@ -155,9 +155,9 @@ export default function LeaderboardsPage() {
                   <span className="font-black text-primary text-lg">Your Current Rank</span>
                   <span className="text-xs font-bold text-[#AFAFAF] uppercase tracking-widest">Only {personalInfo.rank - 50} spots till the top 50!</span>
                 </div>
-                <div className="flex items-center gap-2 bg-primary/10 px-4 py-2 rounded-2xl border-2 border-primary/20">
-                  <Zap className="w-5 h-5 text-primary fill-primary" />
-                  <span className="font-black text-primary text-lg">{personalInfo.xp}</span>
+                <div className="flex items-center gap-2 bg-[#3CC7F5]/10 px-4 py-2 rounded-2xl border-2 border-[#3CC7F5]/20">
+                  <Zap className="w-5 h-5 text-[#3CC7F5] fill-[#3CC7F5]" />
+                  <span className="font-black text-[#3CC7F5] text-lg">{personalInfo.xp}</span>
                 </div>
               </div>
             )}
@@ -251,10 +251,10 @@ function LeaderboardRow({ rank, entry, isUser, xp }: { rank: number, entry: any,
 
       <div className={cn(
         "flex items-center gap-1.5 px-2 md:px-3 py-1 md:py-1.5 rounded-xl transition-colors shrink-0",
-        isUser ? "bg-white border-2 border-primary/20" : "bg-[#F7F7F7] group-hover:bg-white"
+        isUser ? "bg-white border-2 border-[#3CC7F5]/20" : "bg-[#F7F7F7] group-hover:bg-white"
       )}>
-        <Zap className="w-3.5 h-3.5 md:w-4 md:h-4 text-primary fill-primary" />
-        <span className={cn("font-black text-sm md:text-base", isUser ? "text-primary" : "text-[#4B4B4B]")}>{xp}</span>
+        <Zap className="w-3.5 h-3.5 md:w-4 md:h-4 text-[#3CC7F5] fill-[#3CC7F5]" />
+        <span className={cn("font-black text-sm md:text-base", isUser ? "text-[#3CC7F5]" : "text-[#4B4B4B]")}>{xp}</span>
       </div>
     </div>
   );
