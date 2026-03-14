@@ -20,15 +20,15 @@ interface UnitSectionProps {
 export function UnitSection({ title, lessons, onLessonClick }: UnitSectionProps) {
   return (
     <section className="w-full max-w-2xl mx-auto mb-12">
-      {/* Unit Header */}
-      <div className="bg-primary rounded-2xl p-6 mb-8 shadow-[0_4px_0_0_#E6722D] text-white">
-        <h2 className="text-xl font-black uppercase tracking-wide opacity-80 mb-1">
-          Unit 1
-        </h2>
-        <h3 className="text-2xl font-black leading-tight">
-          {title}
-        </h3>
+      <div className="space-y-12 animate-in slide-in-from-bottom-4 duration-500">
+      <div className="bg-primary rounded-[2rem] p-8 text-white shadow-[0_12px_0_0_#E6722D] mb-12 transform hover:-rotate-1 transition-transform hover:scale-[1.02] active:scale-95 cursor-default relative overflow-hidden group">
+        {/* Subtle inner glow */}
+        <div className="absolute inset-0 bg-gradient-to-tr from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+        
+        <p className="text-sm font-black uppercase tracking-widest opacity-80 mb-2">Unit 1</p>
+        <h2 className="text-3xl font-black">{title}</h2>
       </div>
+    </div>
 
       {/* Path Container */}
       <div className="flex flex-col items-center">

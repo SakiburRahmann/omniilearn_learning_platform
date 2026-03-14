@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { BookOpen, Flame, Heart, Star, Target, Zap } from "lucide-react";
+import { BookOpen, Flame, Heart, Star, Target, Zap, Trophy } from "lucide-react";
 import { api } from "@/utils/trpc";
 import { createClient } from "@/lib/supabase-client";
 import { useState, useEffect } from "react";
@@ -30,9 +30,19 @@ export default function DashboardPage() {
   };
 
   return (
-    <div className="space-y-0 pb-12">
+    <div className="space-y-0 pb-12 relative">
+      {/* Decorative background floating icons */}
+      <div className="absolute top-20 left-[-10%] opacity-[0.03] transform -rotate-12 pointer-events-none hidden xl:block">
+        <Trophy size={300} className="text-primary" />
+      </div>
+      <div className="absolute top-60 right-[-10%] opacity-[0.03] transform rotate-12 pointer-events-none hidden xl:block">
+        <Star size={400} className="text-secondary" />
+      </div>
+      <div className="absolute bottom-20 left-[5%] opacity-[0.03] transform rotate-45 pointer-events-none hidden xl:block">
+        <Zap size={250} className="text-accent" />
+      </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-5xl mx-auto px-4 pt-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-5xl mx-auto px-4 pt-8 relative z-10">
         {/* Main Learning Path */}
         <div className="lg:col-span-2 space-y-12">
           {isLoading ? (
