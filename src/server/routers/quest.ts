@@ -4,7 +4,7 @@ import { db } from "@/lib/prisma";
 import { TRPCError } from "@trpc/server";
 import { ensureUserSynced } from "@/lib/user-sync";
 
-function getDayKey() {
+function getDayKey(): string {
   const d = new Date();
   return d.toISOString().split("T")[0]; // "YYYY-MM-DD"
 }
@@ -12,40 +12,66 @@ function getDayKey() {
 export const questRouter = createTRPCRouter({
   /**
    * Fetch daily quests for the current user.
-   * If they don't exist for today, they are instantiated.
+   * If none exist for today, assigns from the template pool.
+   * Optimized: single ensureUserSynced call, selective field fetching.
    */
   getDailyQuests: protectedProcedure.query(async ({ ctx }) => {
     const user = await ensureUserSynced(ctx.user);
     const userId = user.id;
     const dayKey = getDayKey();
 
-    // 1. Fetch user quests for today
+    // 1. Fetch user quests for today with selective fields
     let userQuests = await db.userQuest.findMany({
       where: { userId, dayKey },
-      include: { quest: true },
+      include: {
+        quest: {
+          select: {
+            id: true,
+            title: true,
+            description: true,
+            type: true,
+            targetValue: true,
+            xpReward: true,
+          },
+        },
+      },
+      orderBy: { createdAt: "asc" },
     });
 
-    // 2. If no quests for today, seed them from templates
+    // 2. If no quests for today, assign from templates
     if (userQuests.length === 0) {
       const templates = await db.dailyQuest.findMany({
-        take: 3, // For now just take the first 3
+        take: 3,
+        select: { id: true },
       });
 
       if (templates.length > 0) {
-        // Atomic creation
         await db.userQuest.createMany({
-          data: templates.map((q) => ({
+          data: templates.map((q: { id: string }) => ({
             userId,
             questId: q.id,
             dayKey,
             currentValue: 0,
             isCompleted: false,
           })),
+          skipDuplicates: true,
         });
 
         userQuests = await db.userQuest.findMany({
           where: { userId, dayKey },
-          include: { quest: true },
+          include: {
+            quest: {
+              select: {
+                id: true,
+                title: true,
+                description: true,
+                type: true,
+                targetValue: true,
+                xpReward: true,
+              },
+            },
+          },
+          orderBy: { createdAt: "asc" },
         });
       }
     }
@@ -55,6 +81,7 @@ export const questRouter = createTRPCRouter({
 
   /**
    * Claim reward for a completed quest.
+   * Atomic transaction: mark claimed → increment XP → log event.
    */
   claimReward: protectedProcedure
     .input(z.object({ userQuestId: z.string() }))
@@ -65,7 +92,7 @@ export const questRouter = createTRPCRouter({
       return await db.$transaction(async (tx) => {
         const userQuest = await tx.userQuest.findUnique({
           where: { id: input.userQuestId },
-          include: { quest: true },
+          include: { quest: { select: { xpReward: true } } },
         });
 
         if (!userQuest || userQuest.userId !== userId) {
@@ -80,28 +107,27 @@ export const questRouter = createTRPCRouter({
           throw new TRPCError({ code: "BAD_REQUEST", message: "Reward already claimed" });
         }
 
-        // 1. Mark as claimed
-        await tx.userQuest.update({
-          where: { id: input.userQuestId },
-          data: { isClaimed: true },
-        });
-
-        // 2. Update Profile XP
         const xpAmount = userQuest.quest.xpReward;
-        await tx.studentProfile.update({
-          where: { userId },
-          data: { totalXp: { increment: xpAmount } },
-        });
 
-        // 3. Log XP Event
-        await tx.xpEvent.create({
-          data: {
-            userId,
-            amount: xpAmount,
-            reason: "QUEST_REWARD",
-            referenceId: userQuest.id,
-          },
-        });
+        // Parallel: mark claimed + increment XP + log event
+        await Promise.all([
+          tx.userQuest.update({
+            where: { id: input.userQuestId },
+            data: { isClaimed: true },
+          }),
+          tx.studentProfile.update({
+            where: { userId },
+            data: { totalXp: { increment: xpAmount } },
+          }),
+          tx.xpEvent.create({
+            data: {
+              userId,
+              amount: xpAmount,
+              reason: "QUEST_REWARD",
+              referenceId: userQuest.id,
+            },
+          }),
+        ]);
 
         return { success: true, xpEarned: xpAmount };
       });
