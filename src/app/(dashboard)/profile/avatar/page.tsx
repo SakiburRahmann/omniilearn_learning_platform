@@ -61,6 +61,11 @@ const FACIAL_HAIR = [
   { id: "beard", label: "Beard" },
 ];
 
+const EARS = [
+  { id: "attached", label: "Attached" },
+  { id: "detached", label: "Detached" },
+];
+
 const SHIRT_STYLES = [
   { id: "collared", label: "Collared" },
   { id: "crew", label: "Crew Neck" },
@@ -221,6 +226,14 @@ export default function AvatarEditorPage() {
                     ))}
                   </div>
                 </div>
+                <div>
+                  <h3 className="text-sm font-black text-[#4B4B4B] mb-4">Ears</h3>
+                  <div className="grid grid-cols-2 gap-3">
+                    {EARS.map((s) => (
+                      <button key={s.id} onClick={() => update({ ears: s.id })} className={cn("p-3 rounded-2xl border-2 font-bold text-sm hover:bg-gray-50", config.ears === s.id ? "border-primary text-primary bg-primary/5" : "border-[#E5E5E5] text-[#AFAFAF]")}>{s.label}</button>
+                    ))}
+                  </div>
+                </div>
               </>
             )}
 
@@ -283,19 +296,49 @@ export default function AvatarEditorPage() {
                 </div>
                 <div className="pt-4 border-t-2 border-[#E5E5E5]">
                   <h3 className="text-sm font-black text-[#4B4B4B] mb-4">Glasses</h3>
-                  <div className="grid grid-cols-3 gap-3">
+                  <div className="grid grid-cols-3 gap-3 mb-4">
                     {GLASSES.map((s) => (
                       <button key={s.id} onClick={() => update({ glasses: s.id })} className={cn("p-3 rounded-2xl border-2 font-bold text-sm hover:bg-gray-50", config.glasses === s.id ? "border-primary text-primary bg-primary/5" : "border-[#E5E5E5] text-[#AFAFAF]")}>{s.label}</button>
                     ))}
                   </div>
+                  {config.glasses !== "none" && (
+                    <div>
+                      <h4 className="text-xs font-black text-[#AFAFAF] uppercase mb-3">Glasses Color</h4>
+                      <div className="grid grid-cols-6 sm:grid-cols-10 gap-3">
+                        {HAIR_COLORS.map((color) => (
+                          <button
+                            key={color}
+                            onClick={() => update({ glassesColor: color })}
+                            className={cn("aspect-square rounded-full border-2 transition-all hover:scale-110", config.glassesColor === color ? "border-primary scale-110" : "border-transparent")}
+                            style={{ backgroundColor: `#${color}` }}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
-                <div>
+                <div className="pt-4 border-t-2 border-[#E5E5E5]">
                   <h3 className="text-sm font-black text-[#4B4B4B] mb-4">Earrings</h3>
-                  <div className="grid grid-cols-3 gap-3">
+                  <div className="grid grid-cols-3 gap-3 mb-4">
                     {EARRINGS.map((s) => (
                       <button key={s.id} onClick={() => update({ earrings: s.id })} className={cn("p-3 rounded-2xl border-2 font-bold text-sm hover:bg-gray-50", config.earrings === s.id ? "border-primary text-primary bg-primary/5" : "border-[#E5E5E5] text-[#AFAFAF]")}>{s.label}</button>
                     ))}
                   </div>
+                  {config.earrings !== "none" && (
+                    <div>
+                      <h4 className="text-xs font-black text-[#AFAFAF] uppercase mb-3">Earring Color</h4>
+                      <div className="grid grid-cols-6 sm:grid-cols-10 gap-3">
+                        {SHIRT_COLORS.map((color) => (
+                          <button
+                            key={color}
+                            onClick={() => update({ earringColor: color })}
+                            className={cn("aspect-square rounded-full border-2 transition-all hover:scale-110", config.earringColor === color ? "border-primary scale-110" : "border-transparent")}
+                            style={{ backgroundColor: `#${color}` }}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
               </>
             )}

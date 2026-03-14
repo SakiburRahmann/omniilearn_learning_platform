@@ -41,6 +41,8 @@ export const DEFAULT_AVATAR: MicahOptions = {
   mouth: "smile",
   nose: "pointed",
   backgroundColor: "e5e5e5",
+  glassesColor: "000000",
+  earringColor: "000000",
 };
 
 interface ModularAvatarProps {
