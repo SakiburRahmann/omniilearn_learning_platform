@@ -24,13 +24,22 @@ export function RpmCreator({
 
   useEffect(() => {
     const handleMessageEvent = (event: MessageEvent) => {
+      let data = event.data;
+      if (typeof data === "string") {
+        try {
+          data = JSON.parse(data);
+        } catch {
+          return;
+        }
+      }
+
       // Ensure the message comes from the correct origin
-      if (!event.data || !event.data.source || event.data.source !== "readyplayerme") {
+      if (!data || data.source !== "readyplayerme") {
         return;
       }
 
       // Handle the different event types from the iFrame
-      const evName = event.data.eventName;
+      const evName = data.eventName;
 
       if (evName === "v1.frame.ready") {
         // The iFrame is fully loaded
@@ -48,8 +57,10 @@ export function RpmCreator({
 
       if (evName === "v1.avatar.exported") {
         // The user clicked "Next" and the avatar was generated
-        const avatarUrl = event.data.data.url;
-        onAvatarExported(avatarUrl);
+        const avatarUrl = data.data?.url || data.url;
+        if (avatarUrl) {
+          onAvatarExported(avatarUrl);
+        }
       }
     };
 
