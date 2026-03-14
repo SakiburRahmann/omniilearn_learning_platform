@@ -110,44 +110,59 @@ export default function LeaderboardsPage() {
                 <p className="text-[#AFAFAF] font-black uppercase tracking-widest text-xs">Syncing results...</p>
               </div>
             ) : activeTab === "league" ? (
-              leagueData?.leaderboard.map((entry, index) => {
-                const isUser = entry.userId === userId;
-                const rank = index + 1;
-                const promotionZone = rank <= 10;
-                const demotionZone = index >= 20 && leagueData.leaderboard.length > 25;
+              leagueData?.leaderboard && leagueData.leaderboard.length > 0 ? (
+                leagueData.leaderboard.map((entry, index) => {
+                  const isUser = entry.userId === userId;
+                  const rank = index + 1;
+                  const promotionZone = rank <= 10;
+                  const demotionZone = index >= 20 && leagueData.leaderboard.length > 25;
 
-                return (
-                  <div key={entry.id} className={cn("flex items-center gap-4 px-6 py-4 transition-all group", isUser ? "bg-primary/5 sticky bottom-0 border-t-2 border-b-2 border-primary z-10" : "hover:bg-[#F7F7F7]")}>
-                    <div className="w-8 flex justify-center">
-                      <RankBadge rank={rank} zone={promotionZone ? 'promo' : demotionZone ? 'demo' : 'none'} />
+                  return (
+                    <div key={entry.id} className={cn("flex items-center gap-4 px-6 py-4 transition-all group", isUser ? "bg-primary/5 border-l-4 border-l-primary shadow-sm" : "hover:bg-[#F7F7F7]")}>
+                      <div className="w-8 flex justify-center">
+                        <RankBadge rank={rank} zone={promotionZone ? 'promo' : demotionZone ? 'demo' : 'none'} />
+                      </div>
+                      <UserRow entry={entry} isUser={isUser} xp={entry.xpEarned} />
                     </div>
-                    <UserRow entry={entry} isUser={isUser} xp={entry.xpEarned} />
-                  </div>
-                );
-              })
+                  );
+                })
+              ) : (
+                <div className="flex flex-col items-center justify-center py-20 text-center px-6">
+                   <Users className="w-12 h-12 text-[#E5E5E5] mb-4" />
+                   <h3 className="text-lg font-black text-[#4B4B4B]">Arena is Quiet</h3>
+                   <p className="text-sm font-bold text-[#AFAFAF] max-w-[200px]">Complete a lesson to join the race!</p>
+                </div>
+              )
             ) : (
-              (globalData as any)?.topUsers.map((user: any, index: number) => {
-                const isUser = user.userId === userId;
-                const rank = index + 1;
-                return (
-                  <div key={user.userId} className={cn("flex items-center gap-4 px-6 py-4 transition-all group", isUser ? "bg-primary/5 sticky bottom-0 border-t-2 border-b-2 border-primary z-10" : "hover:bg-[#F7F7F7]")}>
-                    <div className="w-8 flex justify-center">
-                      <RankBadge rank={rank} zone="none" />
+              (globalData as any)?.topUsers && (globalData as any).topUsers.length > 0 ? (
+                (globalData as any).topUsers.map((user: any, index: number) => {
+                  const isUser = user.userId === userId;
+                  const rank = index + 1;
+                  return (
+                    <div key={user.userId} className={cn("flex items-center gap-4 px-6 py-4 transition-all group", isUser ? "bg-primary/5 border-l-4 border-l-primary shadow-sm" : "hover:bg-[#F7F7F7]")}>
+                      <div className="w-8 flex justify-center">
+                        <RankBadge rank={rank} zone="none" />
+                      </div>
+                      <UserRow 
+                        entry={{ 
+                          user: { 
+                            firstName: user.firstName, 
+                            lastName: user.lastName, 
+                            studentProfile: { avatarConfig: user.avatarConfig } 
+                          } 
+                        } as any} 
+                        isUser={isUser} 
+                        xp={user.xp} 
+                      />
                     </div>
-                    <UserRow 
-                      entry={{ 
-                        user: { 
-                          firstName: user.firstName, 
-                          lastName: user.lastName, 
-                          studentProfile: { avatarConfig: user.avatarConfig } 
-                        } 
-                      } as any} 
-                      isUser={isUser} 
-                      xp={user.xp} 
-                    />
-                  </div>
-                );
-              })
+                  );
+                })
+              ) : (
+                <div className="flex flex-col items-center justify-center py-20 text-center px-6">
+                   <Globe className="w-12 h-12 text-[#E5E5E5] mb-4" />
+                   <h3 className="text-lg font-black text-[#4B4B4B]">No Legends Yet</h3>
+                </div>
+              )
             )}
           </div>
         </div>

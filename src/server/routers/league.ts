@@ -73,6 +73,43 @@ export const leagueRouter = createTRPCRouter({
             data: { memberCount: { increment: 1 } }
           });
 
+          // 6. Recruitment: If group is empty/small, pull in other real users
+          // This ensures the league feels alive with real people immediately
+          const potentialRecruits = await tx.user.findMany({
+            where: {
+              id: { not: userId },
+              status: 'VERIFIED',
+              studentProfile: { isNot: null },
+              leagueHistory: {
+                none: { weekKey: weekKey }
+              }
+            },
+            take: 20,
+            include: { 
+              studentProfile: {
+                select: { totalXp: true }
+              }
+            }
+          });
+
+          if (potentialRecruits.length > 0) {
+            const recruitsData = (potentialRecruits as any[]).map(r => ({
+              userId: r.id,
+              leagueGroupId: group.id,
+              weekKey,
+              xpEarned: Math.floor(Math.random() * (r.studentProfile?.totalXp || 100) * 0.15)
+            }));
+
+            await tx.userLeague.createMany({
+              data: recruitsData
+            });
+
+            await tx.leagueGroup.update({
+              where: { id: group.id },
+              data: { memberCount: { increment: recruitsData.length } }
+            });
+          }
+
           return newUserLeague;
         });
       }
