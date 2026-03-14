@@ -42,16 +42,15 @@ const EYEBROWS = [
 const NOSES = [
   { id: "curve", label: "Curved" },
   { id: "pointed", label: "Pointed" },
-  { id: "round", label: "Round" },
+  { id: "tound", label: "Round" }, // Using dicebear's exact spelling typo
 ];
 
 const HAIR_STYLES = [
   { id: "fonze", label: "Fonze" },
   { id: "full", label: "Full" },
-  { id: "normal", label: "Normal" },
   { id: "pixie", label: "Pixie" },
-  { id: "danny", label: "Danny" },
-  { id: "doug", label: "Doug" },
+  { id: "dannyPhantom", label: "Danny" },
+  { id: "dougFunny", label: "Doug" },
   { id: "mrClean", label: "Bald" },
   { id: "mrT", label: "Mohawk" },
   { id: "turban", label: "Turban" },
