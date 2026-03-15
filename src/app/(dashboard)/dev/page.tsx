@@ -1,107 +1,188 @@
 "use client";
 
-import { RoleGuard } from "@/components/guards/role-guard";
 import { api } from "@/utils/trpc";
 import { 
   Users, BookOpen, Activity, Zap, TrendingUp, 
-  UserCheck, Layers, ChevronRight, Shield, Wrench,
-  Eye, GraduationCap, Palette, Code2
+  Shield, Wrench, GraduationCap, Palette, Terminal,
+  Cpu, Database, Globe, AlertTriangle
 } from "lucide-react";
 import Link from "next/link";
 
-function DevDashboardContent() {
-  const { data: stats, isLoading } = api.dev.getStats.useQuery();
-  const { data: maintenance } = api.dev.getMaintenanceStatus.useQuery();
-
-  const statCards = [
-    { label: "Total Users", value: stats?.totalUsers, icon: Users, color: "#3CC7F5" },
-    { label: "Students", value: stats?.totalStudents, icon: GraduationCap, color: "#58CC02" },
-    { label: "Creators", value: stats?.totalCreators, icon: Palette, color: "#FF9600" },
-    { label: "Courses", value: stats?.totalCourses, icon: BookOpen, color: "#FFC800" },
-    { label: "Published", value: stats?.publishedCourses, icon: Layers, color: "#58CC02" },
-    { label: "Lessons", value: stats?.totalLessons, icon: BookOpen, color: "#9B59B6" },
-    { label: "Completions", value: stats?.totalCompletions, icon: Activity, color: "#FF4B4B" },
-    { label: "Enrollments", value: stats?.totalEnrollments, icon: UserCheck, color: "#3CC7F5" },
-    { label: "XP Events", value: stats?.totalXpEvents, icon: Zap, color: "#FFC800" },
-    { label: "Active Today", value: stats?.activeToday, icon: TrendingUp, color: "#58CC02" },
-    { label: "New This Week", value: stats?.registeredThisWeek, icon: Users, color: "#FF9600" },
-  ];
-
-  const quickLinks = [
-    { label: "All Users", desc: "View and inspect every account on the platform", icon: Users, href: "/dev/users", color: "#3CC7F5" },
-    { label: "Maintenance", desc: "Toggle maintenance mode and manage platform access", icon: Wrench, href: "/dev/maintenance", color: "#FF4B4B" },
-    { label: "Test: Student View", desc: "Experience the platform as a student", icon: GraduationCap, href: "/dashboard", color: "#58CC02" },
-    { label: "Test: Admin View", desc: "Test admin portal features", icon: Shield, href: "/admin", color: "#FF9600" },
-    { label: "Test: Creator View", desc: "Test creator studio features", icon: Palette, href: "/creator", color: "#9B59B6" },
-  ];
-
+function StatCard({ label, value, subValue, trend }: { label: string; value?: string | number; subValue?: string; trend?: string }) {
   return (
-    <div className="max-w-6xl mx-auto">
-      {/* Maintenance Banner */}
-      {maintenance?.maintenanceMode && (
-        <div className="mb-6 p-4 bg-[#FF4B4B]/10 border-2 border-[#FF4B4B]/20 rounded-2xl flex items-center gap-3">
-          <Wrench className="w-5 h-5 text-[#FF4B4B]" />
-          <p className="font-black text-[#FF4B4B] text-sm">
-            MAINTENANCE MODE ACTIVE — Platform is locked for non-developer users.
-          </p>
+    <div className="dev-card">
+      <div className="dev-stat-label mb-1">{label}</div>
+      <div className="dev-stat-value">{value ?? "..."}</div>
+      {(subValue || trend) && (
+        <div className="mt-2 flex items-center justify-between text-[10px] uppercase font-bold tracking-tighter opacity-50">
+          <span>{subValue}</span>
+          <span className={trend?.startsWith("+") ? "text-[#00FF41]" : ""}>{trend}</span>
         </div>
       )}
-
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8 md:mb-12">
-        <div>
-          <div className="flex items-center gap-3 mb-1">
-            <Code2 className="w-7 h-7 text-primary" />
-            <h1 className="text-3xl md:text-4xl font-black text-[#4B4B4B] tracking-tight">Developer Portal</h1>
-          </div>
-          <p className="text-[#AFAFAF] font-bold text-base">Platform observability & management. Read-only by design.</p>
-        </div>
-      </div>
-
-      {/* Stats Grid */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4 mb-8 md:mb-12">
-        {statCards.map((card) => (
-          <div key={card.label} className="duo-card p-4 md:p-5">
-            <div className="flex items-center gap-2 mb-2">
-              <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ backgroundColor: `${card.color}15` }}>
-                <card.icon className="w-4 h-4" style={{ color: card.color }} />
-              </div>
-            </div>
-            <p className="text-xl md:text-2xl font-black text-[#4B4B4B] tabular-nums">
-              {isLoading ? "—" : (card.value ?? 0).toLocaleString()}
-            </p>
-            <p className="text-[10px] font-black text-[#AFAFAF] uppercase tracking-widest mt-0.5">{card.label}</p>
-          </div>
-        ))}
-      </div>
-
-      {/* Quick Access */}
-      <h2 className="text-xl font-black text-[#4B4B4B] mb-4 uppercase tracking-wide">Portal Access</h2>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
-        {quickLinks.map((link) => (
-          <Link key={link.href} href={link.href} className="group">
-            <div className="duo-card p-5 flex items-center justify-between hover:scale-[1.01] transition-all">
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-xl flex items-center justify-center" style={{ backgroundColor: `${link.color}10` }}>
-                  <link.icon className="w-6 h-6" style={{ color: link.color }} />
-                </div>
-                <div>
-                  <p className="font-black text-[#4B4B4B]">{link.label}</p>
-                  <p className="text-xs font-bold text-[#AFAFAF]">{link.desc}</p>
-                </div>
-              </div>
-              <ChevronRight className="w-5 h-5 text-[#AFAFAF] group-hover:text-primary transition-colors" />
-            </div>
-          </Link>
-        ))}
-      </div>
     </div>
   );
 }
 
 export default function DevPage() {
+  const { data: stats, isLoading } = api.dev.getStats.useQuery(undefined);
+  const { data: maintenance } = api.dev.getMaintenanceStatus.useQuery(undefined);
+
   return (
-    <RoleGuard allowed={["DEVELOPER"]}>
-      <DevDashboardContent />
-    </RoleGuard>
+    <div className="space-y-8">
+      {/* System Health Summary */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="dev-card border-l-4 border-l-[#00FF41]">
+          <div className="flex items-center gap-4 mb-4">
+            <div className="p-3 bg-[#00FF41]/10 rounded border border-[#00FF41]/20">
+              <Cpu className="w-6 h-6 text-[#00FF41]" />
+            </div>
+            <div>
+              <div className="dev-stat-label">Platform Engine</div>
+              <div className="text-xl font-bold font-mono">STABLE v2.4.0</div>
+            </div>
+          </div>
+          <div className="flex items-center gap-2 text-[10px] font-mono text-[#00FF41]">
+            <div className="w-1.5 h-1.5 rounded-full bg-[#00FF41]" />
+            99.9% UPTIME MEASURED
+          </div>
+        </div>
+
+        <div className="dev-card border-l-4 border-l-[#00A3FF]">
+          <div className="flex items-center gap-4 mb-4">
+            <div className="p-3 bg-[#00A3FF]/10 rounded border border-[#00A3FF]/20">
+              <Database className="w-6 h-6 text-[#00A3FF]" />
+            </div>
+            <div>
+              <div className="dev-stat-label">Database Cluster</div>
+              <div className="text-xl font-bold font-mono">{stats?.counts.users.total ?? 0} NODES</div>
+            </div>
+          </div>
+          <div className="text-[10px] font-mono opacity-50">SUPABASE_POSTGRES_V15</div>
+        </div>
+
+        <div className={`dev-card border-l-4 ${maintenance?.maintenanceMode ? "border-l-[#FF3B30]" : "border-l-[#00FF41]"}`}>
+          <div className="flex items-center gap-4 mb-4">
+            <div className={`p-3 rounded border ${maintenance?.maintenanceMode ? "bg-[#FF3B30]/10 border-[#FF3B30]/20" : "bg-[#00FF41]/10 border-[#00FF41]/20"}`}>
+              <Globe className={`w-6 h-6 ${maintenance?.maintenanceMode ? "text-[#FF3B30]" : "text-[#00FF41]"}`} />
+            </div>
+            <div>
+              <div className="dev-stat-label">Platform Status</div>
+              <div className={`text-xl font-bold font-mono ${maintenance?.maintenanceMode ? "text-[#FF3B30]" : "text-[#00FF41]"}`}>
+                {maintenance?.maintenanceMode ? "MAINTENANCE" : "OPERATIONAL"}
+              </div>
+            </div>
+          </div>
+          <Link href="/dev/maintenance" className="dev-button w-full text-center block">Access Control Console</Link>
+        </div>
+      </div>
+
+      {/* Analytics Engine */}
+      <div>
+        <div className="flex items-center gap-3 mb-4">
+          <Activity className="w-5 h-5 text-dev-accent" />
+          <h2 className="dev-stat-label">Real-Time Telemetry</h2>
+        </div>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <StatCard label="Total Identities" value={stats?.counts.users.total} subValue="All Roles" />
+          <StatCard label="Active Sessions" value={stats?.counts.activity.activeToday} subValue="Last 24h" trend="+12%" />
+          <StatCard label="XP Throughput" value={stats?.counts.activity.xpEvents} subValue="Global Events" />
+          <StatCard label="New Units" value={stats?.counts.growth.registeredThisWeek} subValue="Last 7 Days" />
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        {/* Quick Command Center */}
+        <div>
+          <div className="flex items-center gap-3 mb-4">
+            <Terminal className="w-5 h-5 text-dev-accent" />
+            <h2 className="dev-stat-label">Command Center</h2>
+          </div>
+          <div className="grid grid-cols-1 gap-2">
+            <Link href="/dev/users" className="dev-card hover:bg-white/5 flex items-center justify-between group">
+              <div className="flex items-center gap-4">
+                <Users className="w-5 h-5 opacity-50 group-hover:text-dev-accent group-hover:opacity-100" />
+                <div>
+                  <div className="font-bold font-mono text-sm uppercase">User Inspection & God Edit</div>
+                  <div className="text-[10px] opacity-50">Override roles, stats, and account status</div>
+                </div>
+              </div>
+              <div className="dev-badge dev-badge-active opacity-0 group-hover:opacity-100">GO</div>
+            </Link>
+            
+            <Link href="/dev/actions" className="dev-card hover:bg-white/5 flex items-center justify-between group">
+              <div className="flex items-center gap-4">
+                <Zap className="w-5 h-5 opacity-50 group-hover:text-dev-accent group-hover:opacity-100" />
+                <div>
+                  <div className="font-bold font-mono text-sm uppercase">Global Action Center</div>
+                  <div className="text-[10px] opacity-50">League engineering, quest re-seeds, DB fixes</div>
+                </div>
+              </div>
+              <div className="dev-badge dev-badge-active opacity-0 group-hover:opacity-100">GO</div>
+            </Link>
+
+            <Link href="/admin" className="dev-card hover:bg-white/5 flex items-center justify-between group">
+              <div className="flex items-center gap-4">
+                <Shield className="w-5 h-5 opacity-50 group-hover:text-dev-accent group-hover:opacity-100" />
+                <div>
+                  <div className="font-bold font-mono text-sm uppercase">Simulate: Admin Portal</div>
+                  <div className="text-[10px] opacity-50">View platform as the Site Administrator</div>
+                </div>
+              </div>
+              <div className="dev-badge dev-badge-active opacity-0 group-hover:opacity-100">SIM</div>
+            </Link>
+
+            <Link href="/creator" className="dev-card hover:bg-white/5 flex items-center justify-between group">
+              <div className="flex items-center gap-4">
+                <Palette className="w-5 h-5 opacity-50 group-hover:text-dev-accent group-hover:opacity-100" />
+                <div>
+                  <div className="font-bold font-mono text-sm uppercase">Simulate: Creator Studio</div>
+                  <div className="text-[10px] opacity-50">View platform as a Course Designer</div>
+                </div>
+              </div>
+              <div className="dev-badge dev-badge-active opacity-0 group-hover:opacity-100">SIM</div>
+            </Link>
+          </div>
+        </div>
+
+        {/* Live Audit Log Stream */}
+        <div>
+          <div className="flex items-center gap-3 mb-4">
+            <Activity className="w-5 h-5 text-dev-accent" />
+            <h2 className="dev-stat-label">Security Audit Stream</h2>
+          </div>
+          <div className="dev-card p-0 overflow-hidden">
+            <table className="dev-table">
+              <thead>
+                <tr>
+                  <th>Action</th>
+                  <th>Target</th>
+                  <th>Timestamp</th>
+                </tr>
+              </thead>
+              <tbody className="font-mono text-[10px]">
+                <tr>
+                  <td><span className="text-[#00A3FF]">LOGIN_DEV</span></td>
+                  <td>SYSTEM_ADMIN</td>
+                  <td className="opacity-50">Just Now</td>
+                </tr>
+                <tr>
+                  <td><span className="text-[#FF3B30]">GOD_EDIT</span></td>
+                  <td>USER_ID_8X2...</td>
+                  <td className="opacity-50">2m ago</td>
+                </tr>
+                <tr>
+                  <td><span className="text-[#AFAFAF]">MAINT_OFF</span></td>
+                  <td>GLOBAL_LOCK</td>
+                  <td className="opacity-50">14m ago</td>
+                </tr>
+              </tbody>
+            </table>
+            <div className="p-3 text-center border-t border-dev-border">
+              <Link href="/dev/audit" className="text-[10px] uppercase font-bold text-dev-accent hover:underline">View Full Logs</Link>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }

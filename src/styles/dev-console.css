@@ -1,0 +1,139 @@
+/* Elite Developer Console - Industrial/Technical Theme */
+
+@layer base {
+  .dev-console {
+    --dev-bg: #0A0A0B;
+    --dev-card: #151518;
+    --dev-border: #26262C;
+    --dev-accent: #00A3FF;
+    --dev-accent-muted: rgba(0, 163, 255, 0.1);
+    --dev-text-primary: #E1E1E6;
+    --dev-text-secondary: #94949E;
+    --dev-mono: 'JetBrains Mono', 'IBM Plex Mono', ui-monospace, monospace;
+    
+    background-color: var(--dev-bg);
+    color: var(--dev-text-primary);
+    min-height: 100vh;
+  }
+}
+
+.dev-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+}
+
+.dev-card {
+  background: var(--dev-card);
+  border: 1px solid var(--dev-border);
+  border-radius: 4px; /* Industrial sharp corners */
+  padding: 1.5rem;
+  transition: all 0.2s ease;
+}
+
+.dev-card:hover {
+  border-color: var(--dev-accent);
+  box-shadow: 0 0 20px rgba(0, 163, 255, 0.05);
+}
+
+.dev-header {
+  border-bottom: 1px solid var(--dev-border);
+  padding: 1rem 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(10, 10, 11, 0.8);
+  backdrop-filter: blur(8px);
+  position: sticky;
+  top: 0;
+  z-index: 50;
+}
+
+.dev-title {
+  font-family: var(--dev-mono);
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: -0.05em;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.dev-title::before {
+  content: '';
+  width: 8px;
+  height: 8px;
+  background: var(--dev-accent);
+  border-radius: 2px;
+}
+
+.dev-stat-value {
+  font-family: var(--dev-mono);
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--dev-accent);
+}
+
+.dev-stat-label {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--dev-text-secondary);
+  font-weight: 600;
+}
+
+.dev-badge {
+  padding: 0.25rem 0.6rem;
+  border-radius: 2px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  font-family: var(--dev-mono);
+}
+
+.dev-badge-active { background: #00FF4122; color: #00FF41; border: 1px solid #00FF4144; }
+.dev-badge-alert { background: #FF3B3022; color: #FF3B30; border: 1px solid #FF3B3044; }
+
+.dev-button {
+  background: var(--dev-border);
+  border: 1px solid transparent;
+  color: var(--dev-text-primary);
+  padding: 0.5rem 1rem;
+  font-family: var(--dev-mono);
+  font-size: 0.8rem;
+  font-weight: 600;
+  border-radius: 2px;
+  transition: all 0.2s;
+}
+
+.dev-button:hover {
+  background: var(--dev-accent-muted);
+  border-color: var(--dev-accent);
+  color: var(--dev-accent);
+}
+
+.dev-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.dev-table th {
+  text-align: left;
+  padding: 0.75rem 1rem;
+  background: var(--dev-bg);
+  color: var(--dev-text-secondary);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  font-family: var(--dev-mono);
+  border-bottom: 1px solid var(--dev-border);
+}
+
+.dev-table td {
+  padding: 1rem;
+  border-bottom: 1px solid var(--dev-border);
+  font-size: 0.875rem;
+}
+
+.dev-table tr:hover td {
+  background: rgba(255, 255, 255, 0.02);
+}

@@ -179,6 +179,7 @@ enum CourseStatus {
   IN_REVIEW
   PUBLISHED
   REJECTED
+  ARCHIVED
 }
 
 model CoursePrerequisite {
@@ -771,6 +772,10 @@ enum DevActionType {
   IMPERSONATE
   SEED
   RESET
+  UPDATE_USER
+  UPDATE_PROFILE
+  UPDATE_COURSE
+  TOGGLE_MAINTENANCE
 }
 
 model DevImpersonationLog {
