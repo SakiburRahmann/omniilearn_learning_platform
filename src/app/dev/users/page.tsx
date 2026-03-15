@@ -8,12 +8,12 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 
-export default function UserInspectionPage() {
+export default function IdentityManagementPage() {
   const [search, setSearch] = useState("");
   const { data: users, isLoading, refetch } = api.dev.getAllUsers.useQuery({});
   const [selectedUser, setSelectedUser] = useState<any>(null);
   
-  const updateUser = api.dev.godUpdateUser.useMutation({
+  const updateUser = api.dev.adminOverrideUser.useMutation({
     onSuccess: () => {
       refetch();
       setSelectedUser(null);
@@ -30,15 +30,15 @@ export default function UserInspectionPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="dev-title text-2xl mb-1">USER_INSPECTION_ENGINE</h1>
-          <p className="text-[10px] uppercase font-bold tracking-widest opacity-50">Direct Identity Manipulation & Lifecycle Management</p>
+          <h1 className="dev-title text-2xl mb-1">IDENTITY_MANAGEMENT_ENGINE</h1>
+          <p className="text-[10px] uppercase font-bold tracking-widest opacity-50">Direct Identity Orchestration & Lifecycle Management</p>
         </div>
         <div className="flex items-center gap-3">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 opacity-30" />
             <input 
               type="text" 
-              placeholder="SEARCH IDENTITY..." 
+              placeholder="SEARCH_UUID_OR_EMAIL..." 
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="bg-black/40 border border-dev-border rounded px-10 py-2 font-mono text-xs focus:outline-none focus:border-dev-accent w-64"
@@ -46,7 +46,7 @@ export default function UserInspectionPage() {
           </div>
           <button className="dev-button flex items-center gap-2">
             <UserPlus className="w-3 h-3" />
-            PROVISION_TEST_ACC
+            PROVISION_TEST_IDENTITY
           </button>
         </div>
       </div>
@@ -56,16 +56,16 @@ export default function UserInspectionPage() {
           <thead>
             <tr>
               <th>Identity</th>
-              <th>Role</th>
-              <th>Status</th>
-              <th>Telemetry</th>
-              <th>Created</th>
+              <th>Role_Cluster</th>
+              <th>Status_Flag</th>
+              <th>XP_Throughput</th>
+              <th>Provisioned</th>
               <th>Actions</th>
             </tr>
           </thead>
           <tbody className="font-mono text-xs">
             {isLoading ? (
-              <tr><td colSpan={6} className="text-center py-8 opacity-50">SCANNING DATABASE...</td></tr>
+              <tr><td colSpan={6} className="text-center py-8 opacity-50">SCANNING_DISTRIBUTED_NODES...</td></tr>
             ) : filteredUsers?.map((user: any) => (
               <tr key={user.id}>
                 <td className="py-4">
@@ -88,7 +88,7 @@ export default function UserInspectionPage() {
                 </td>
                 <td>
                   <div className="text-[10px] opacity-50">
-                    XP: {(user as any).studentProfile?.totalXp ?? 0}
+                    XP_VAL: {(user as any).studentProfile?.totalXp ?? 0}
                   </div>
                 </td>
                 <td className="opacity-50 text-[10px]">
@@ -108,12 +108,12 @@ export default function UserInspectionPage() {
         </table>
       </div>
 
-      {/* God Edit Modal */}
+      {/* Record Override Modal */}
       {selectedUser && (
         <div className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="dev-card w-full max-w-md border-dev-accent shadow-[0_0_50px_rgba(0,163,255,0.1)]">
             <div className="flex items-center justify-between mb-6">
-              <div className="dev-title text-sm">GOD_EDIT: {selectedUser.email}</div>
+              <div className="dev-title text-sm">RECORD_OVERRIDE: {selectedUser.email}</div>
               <button onClick={() => setSelectedUser(null)} className="opacity-50 hover:opacity-100">
                 <X className="w-5 h-5" />
               </button>
@@ -132,7 +132,7 @@ export default function UserInspectionPage() {
             }} className="space-y-6">
               <div className="space-y-4">
                 <div>
-                  <label className="dev-stat-label block mb-1">Identity Role</label>
+                  <label className="dev-stat-label block mb-1">Identity Role Authority</label>
                   <select 
                     name="role" 
                     defaultValue={selectedUser.role}
@@ -146,7 +146,7 @@ export default function UserInspectionPage() {
                 </div>
 
                 <div>
-                  <label className="dev-stat-label block mb-1">Identity Status</label>
+                  <label className="dev-stat-label block mb-1">Account Lifecycle Status</label>
                   <select 
                     name="status" 
                     defaultValue={selectedUser.status}
@@ -167,7 +167,7 @@ export default function UserInspectionPage() {
                   className="dev-button w-full bg-dev-accent/10 border-dev-accent text-dev-accent py-3 flex items-center justify-center gap-2"
                 >
                   {updateUser.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
-                  COMMIT_GOD_OVERRIDE
+                  COMMIT_RECORDS_OVERRIDE
                 </button>
               </div>
             </form>

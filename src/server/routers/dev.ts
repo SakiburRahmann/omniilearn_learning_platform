@@ -137,7 +137,7 @@ export const devRouter = createTRPCRouter({
   /**
    * GOD MODE: Update any field on a user.
    */
-  godUpdateUser: developerProcedure
+  adminOverrideUser: developerProcedure
     .input(z.object({
       userId: z.string(),
       data: z.object({
@@ -167,9 +167,9 @@ export const devRouter = createTRPCRouter({
     }),
 
   /**
-   * GOD MODE: Update student profile stats.
+   * ADMINISTRATIVE OVERRIDE: Update student profile attributes.
    */
-  godUpdateStudentProfile: developerProcedure
+  adminOverrideProfile: developerProcedure
     .input(z.object({
       userId: z.string(),
       data: z.object({
@@ -198,9 +198,9 @@ export const devRouter = createTRPCRouter({
     }),
 
   /**
-   * GOD MODE: Update any course.
+   * ADMINISTRATIVE OVERRIDE: Update any course record.
    */
-  godUpdateCourse: developerProcedure
+  adminOverrideCourse: developerProcedure
     .input(z.object({
       courseId: z.string(),
       data: z.object({
@@ -278,7 +278,7 @@ export const devRouter = createTRPCRouter({
     }),
 
   /**
-   * GOD MODE: Get raw audit logs.
+   * ADMINISTRATIVE OVERRIDE: Get raw system audit logs.
    */
   getAuditLogs: developerProcedure
     .input(z.object({

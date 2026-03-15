@@ -29,8 +29,8 @@ export default function ActionCenterPage() {
   return (
     <div className="max-w-4xl mx-auto space-y-12">
       <div>
-        <h1 className="dev-title text-2xl mb-2">GLOBAL ACTION CENTER</h1>
-        <p className="text-[10px] uppercase font-bold tracking-widest opacity-50">Industrial-Grade Platform Engineering & God Mode Control</p>
+        <h1 className="dev-title text-2xl mb-2">GLOBAL_OPERATIONS_CENTER</h1>
+        <p className="text-[10px] uppercase font-bold tracking-widest opacity-50">Industrial-Grade Platform Engineering & Administrative Control Protocols</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -38,26 +38,26 @@ export default function ActionCenterPage() {
         <section className="space-y-4">
           <div className="flex items-center gap-2 mb-2">
             <BarChart3 className="w-4 h-4 text-dev-accent" />
-            <h2 className="dev-stat-label">League Engineering</h2>
+            <h2 className="dev-stat-label">League Lifecycle Engineering</h2>
           </div>
           <div className="dev-card space-y-4">
             <div>
-              <div className="font-bold text-sm mb-1">FORCE SEASON RESET</div>
-              <p className="text-[10px] opacity-50 mb-4">Calculates promotions/demotions and clears current week XP for all users.</p>
+              <div className="font-bold text-sm mb-1">RESET_SEASON_FLIP</div>
+              <p className="text-[10px] opacity-50 mb-4">Calculates promotions/demotions and clears current window telemetry for all nodes.</p>
               <button 
-                onClick={() => alert("Logic to be implemented in devRouter: godResetLeagues")}
+                onClick={() => alert("Administrative Procedure: RESET_SEASON_FLIP")}
                 className="dev-button w-full flex items-center justify-center gap-2 text-dev-accent"
               >
                 <RotateCcw className="w-3 h-3" />
-                EXECUTE SEASON FLIP
+                EXECUTE_SEASON_FLIP
               </button>
             </div>
             <div className="pt-4 border-t border-dev-border">
-              <div className="font-bold text-sm mb-1">REBALANCE GROUPS</div>
-              <p className="text-[10px] opacity-50 mb-4">Shuffles users into optimal league groups based on activity density.</p>
+              <div className="font-bold text-sm mb-1">OPTIMIZE_NODE_CLUSTERS</div>
+              <p className="text-[10px] opacity-50 mb-4">Shuffles users into optimal lifecycle groups based on activity density.</p>
               <button className="dev-button w-full flex items-center justify-center gap-2">
                 <RefreshCw className="w-3 h-3" />
-                RUN REBALANCE JOB
+                RUN_REBALANCE_JOB
               </button>
             </div>
           </div>
@@ -67,23 +67,23 @@ export default function ActionCenterPage() {
         <section className="space-y-4">
           <div className="flex items-center gap-2 mb-2">
             <Database className="w-4 h-4 text-dev-accent" />
-            <h2 className="dev-stat-label">Content & Data Ops</h2>
+            <h2 className="dev-stat-label">Datalake & Content Ops</h2>
           </div>
           <div className="dev-card space-y-4">
             <div>
-              <div className="font-bold text-sm mb-1">RE-SEED DAILY QUESTS</div>
-              <p className="text-[10px] opacity-50 mb-4">Wipes all current user quests and re-generates assignments for today.</p>
+              <div className="font-bold text-sm mb-1">PROVISION_DAILY_QUESTS</div>
+              <p className="text-[10px] opacity-50 mb-4">Wipes all current user state and re-generates assignments for current cycle.</p>
               <button className="dev-button w-full flex items-center justify-center gap-2">
                 <Zap className="w-3 h-3" />
-                FORCE RE-SEED
+                FORCE_RESEED_QUERY
               </button>
             </div>
             <div className="pt-4 border-t border-dev-border">
-              <div className="font-bold text-sm mb-1">PURGE ORPHANED ASSETS</div>
-              <p className="text-[10px] opacity-50 mb-4">Deletes loose lessons/units that are no longer linked to an active course.</p>
+              <div className="font-bold text-sm mb-1">PRUNE_ORPHANED_ENTITIES</div>
+              <p className="text-[10px] opacity-50 mb-4">Deletes unlinked lessons/units that no longer align with active course topology.</p>
               <button className="dev-button w-full flex items-center justify-center gap-2 text-[#FF3B30]">
                 <Trash2 className="w-3 h-3" />
-                EXECUTE PURGE
+                EXECUTE_PRUNE_JOB
               </button>
             </div>
           </div>
@@ -93,21 +93,21 @@ export default function ActionCenterPage() {
         <section className="space-y-4">
           <div className="flex items-center gap-2 mb-2">
             <ShieldAlert className="w-4 h-4 text-[#FF3B30]" />
-            <h2 className="dev-stat-label">System Integrity (Emergency)</h2>
+            <h2 className="dev-stat-label">Emergency Protocol Engagement</h2>
           </div>
           <div className="dev-card bg-[#FF3B30]/5 border-[#FF3B30]/20 space-y-4">
             <div>
-              <div className="font-bold text-sm mb-1 text-[#FF3B30]">GLOBAL ACCESS LOCK</div>
-              <p className="text-[10px] opacity-70 mb-4">Immediately terminates all non-dev sessions and prevents new logins.</p>
+              <div className="font-bold text-sm mb-1 text-[#FF3B30]">GLOBAL_ACCESS_TERMINAL_LOCK</div>
+              <p className="text-[10px] opacity-70 mb-4">Immediately terminates all non-architect sessions and prevents new inbound connections.</p>
               <button className="dev-button w-full bg-[#FF3B30] text-white hover:bg-[#D7332A] border-none">
-                ENGAGE EMERGENCY LOCK
+                ENGAGE_EMERGENCY_BARRIER
               </button>
             </div>
             <div className="pt-4 border-t border-[#FF3B30]/20">
-              <div className="font-bold text-sm mb-1 text-[#FF3B30]">WIPE STREAK IRREGULARITIES</div>
-              <p className="text-[10px] opacity-70 mb-4">Reset streaks for accounts found abusing timezone manipulation hacks.</p>
+              <div className="font-bold text-sm mb-1 text-[#FF3B30]">MITIGATE_TELEMETRY_EXPLOITS</div>
+              <p className="text-[10px] opacity-70 mb-4">Reset streak metrics for identities found using temporal manipulation vectors.</p>
               <button className="dev-button w-full text-[#FF3B30] border-[#FF3B30]/50 hover:bg-[#FF3B30]/10">
-                FIX STREAK EXPLOITS
+                PATCH_STREAK_VULNERABILITIES
               </button>
             </div>
           </div>
@@ -117,16 +117,16 @@ export default function ActionCenterPage() {
         <section className="space-y-4">
           <div className="flex items-center gap-2 mb-2">
             <CheckCircle2 className="w-4 h-4 text-[#00FF41]" />
-            <h2 className="dev-stat-label">Automation Log</h2>
+            <h2 className="dev-stat-label">Automation Log Stream</h2>
           </div>
           <div className="dev-card h-[310px] overflow-y-auto font-mono text-[9px] p-4 bg-black/40">
             <div className="space-y-1">
-              <div className="text-[#00FF41]">[OK] 2026-03-15 17:30:12 - DailyQuestManager: Processed 1.2k rows</div>
-              <div className="text-[#00A3FF]">[INFO] 2026-03-15 17:28:44 - CacheFlush: GlobalLeaderboard invalidated</div>
-              <div className="opacity-50 text-white">[LOG] 2026-03-15 17:25:01 - SessionCleanup: 42 inactive tokens removed</div>
-              <div className="text-[#FF9600]">[WARN] 2026-03-15 17:20:11 - LeagueSync: Detected missing group for tier 4</div>
-              <div className="text-[#00FF41]">[OK] 2026-03-15 17:15:33 - EmailWorker: 45 notifications dispatched</div>
-              <div className="opacity-30 text-white">... system polling continuous ...</div>
+              <div className="text-[#00FF41]">[OK] 2026-03-15 17:30:12 - DailyQuestManager: Processed 1.2k entries</div>
+              <div className="text-[#00A3FF]">[INFO] 2026-03-15 17:28:44 - Cache_Flush: GlobalLeaderboard_Invalidated</div>
+              <div className="opacity-50 text-white">[LOG] 2026-03-15 17:25:01 - Session_Cleanup: 42 inactive tokens purged</div>
+              <div className="text-[#FF9600]">[WARN] 2026-03-15 17:20:11 - Topology_Sync: Detected missing node for shard 4</div>
+              <div className="text-[#00FF41]">[OK] 2026-03-15 17:15:33 - Identity_Dispatch: 45 notifications routed</div>
+              <div className="opacity-30 text-white">... architectural polling continuous ...</div>
             </div>
           </div>
         </section>
@@ -136,12 +136,9 @@ export default function ActionCenterPage() {
         <div className="flex items-center gap-4">
           <AlertTriangle className="w-8 h-8 text-dev-accent" />
           <div>
-            <div className="font-black text-lg">GOD MODE WARNING</div>
-            <p className="text-xs font-bold opacity-70">All actions are recorded in the Secure Audit Log and cannot be undone. Use with extreme caution.</p>
+            <div className="font-black text-lg">ADMINISTRATIVE_OVERRIDE_WARNING</div>
+            <p className="text-xs font-bold opacity-70">All architectural modifications are logged to the immutable Audit Stream. Irreversible State Change Warning.</p>
           </div>
-        </div>
-        <div className="px-4 py-2 border border-dev-accent text-dev-accent font-mono text-xs font-bold">
-          SECURE_NODE_01
         </div>
       </div>
     </div>

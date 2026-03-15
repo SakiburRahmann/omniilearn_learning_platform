@@ -12,7 +12,8 @@ import {
   Database,
   Eye,
   BarChart3,
-  Cpu
+  Cpu,
+  Monitor
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { createClient } from "@/lib/supabase-client";
@@ -24,13 +25,13 @@ interface NavItem {
 }
 
 const navItems: NavItem[] = [
-  { icon: Activity, label: "Dashboard", href: "/dev" },
-  { icon: Users, label: "Users & God Edit", href: "/dev/users" },
-  { icon: Database, label: "Action Center", href: "/dev/actions" },
-  { icon: Eye, label: "Impersonation", href: "/dev/impersonate" },
-  { icon: BarChart3, label: "Analytics", href: "/dev/analytics" },
-  { icon: ShieldAlert, label: "Audit Logs", href: "/dev/logs" },
-  { icon: Settings, label: "System Config", href: "/dev/config" },
+  { icon: Activity, label: "Console Overview", href: "/dev" },
+  { icon: Users, label: "Identity Management", href: "/dev/users" },
+  { icon: Database, label: "Operations Center", href: "/dev/actions" },
+  { icon: Eye, label: "Identity Impersonation", href: "/dev/impersonate" },
+  { icon: BarChart3, label: "Platform Analytics", href: "/dev/analytics" },
+  { icon: ShieldAlert, label: "System Audit Logs", href: "/dev/logs" },
+  { icon: Settings, label: "System Topology", href: "/dev/config" },
 ];
 
 export function DevSidebar({ className }: { className?: string }) {
@@ -51,15 +52,15 @@ export function DevSidebar({ className }: { className?: string }) {
         <div className="flex items-center gap-3">
           <Cpu className="text-dev-accent w-6 h-6 animate-pulse" />
           <div className="text-xs font-black tracking-widest text-white">
-            OMNII<span className="text-dev-accent">_CORE</span>
+            ARCHITECT<span className="text-dev-accent">_CONSOLE</span>
           </div>
         </div>
-        <div className="mt-2 text-[8px] opacity-40 uppercase tracking-[0.2em]">Kernel v2.4.0_Stable</div>
+        <div className="mt-2 text-[8px] opacity-40 uppercase tracking-[0.2em]">Platform Core v2.4.0_Stable</div>
       </div>
 
       {/* Navigation */}
       <nav className="flex-1 p-4 space-y-1">
-        <div className="px-3 mb-2 text-[9px] uppercase font-bold opacity-30 tracking-widest">Navigation_Cluster</div>
+        <div className="px-3 mb-2 text-[9px] uppercase font-bold opacity-30 tracking-widest">Management_Cluster</div>
         {navItems.map((item) => {
           const isActive = pathname === item.href;
           return (
@@ -78,15 +79,21 @@ export function DevSidebar({ className }: { className?: string }) {
             </Link>
           );
         })}
+
+        <div className="px-3 mt-6 mb-2 text-[9px] uppercase font-bold opacity-30 tracking-widest">Simulation_Engines</div>
+        <Link href="/dashboard" className="flex items-center gap-3 px-3 py-2 rounded text-white/50 hover:text-white hover:bg-white/5 transition-all">
+          <Monitor className="w-4 h-4" />
+          <span className="text-[11px] uppercase tracking-wider">Student Dashboard</span>
+        </Link>
       </nav>
 
       {/* Security Checkmark */}
       <div className="p-4 mx-4 mb-4 rounded border border-dev-accent/20 bg-dev-accent/5">
         <div className="flex items-center gap-2 mb-1">
           <div className="w-1.5 h-1.5 rounded-full bg-[#00FF41]" />
-          <span className="text-[9px] text-white/70 font-bold uppercase">Node_Secure</span>
+          <span className="text-[9px] text-white/70 font-bold uppercase">Node_Authorization</span>
         </div>
-        <div className="text-[8px] opacity-40 leading-tight">All write ops are logged to Secure Audit Stream.</div>
+        <div className="text-[8px] opacity-40 leading-tight">All write operations are recorded in the System Audit Stream.</div>
       </div>
 
       {/* Footer / Logout */}
@@ -96,7 +103,7 @@ export function DevSidebar({ className }: { className?: string }) {
           className="flex items-center gap-3 w-full px-3 py-2 rounded text-white/50 hover:text-[#FF3B30] hover:bg-[#FF3B30]/5 transition-all group"
         >
           <LogOut className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
-          <span className="text-[11px] uppercase tracking-wider">Terminate_Session</span>
+          <span className="text-[11px] uppercase tracking-wider">Deauthorize_Session</span>
         </button>
       </div>
     </aside>
