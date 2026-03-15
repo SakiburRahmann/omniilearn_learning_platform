@@ -2,13 +2,13 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, Map, Trophy, User, Sparkles, Settings } from "lucide-react";
+import { Home, Map, Trophy, User, Sparkles, Settings, Users, Shield, Palette, BookOpen } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { api } from "@/utils/trpc";
 import { ModularAvatar, DEFAULT_AVATAR } from "@/components/avatar/modular-avatar";
 
 
-const mobileItems = [
+const studentMobileItems = [
   { icon: Home, label: "Learn", href: "/dashboard" },
   { icon: Map, label: "Courses", href: "/courses" },
   { icon: Trophy, label: "Leagues", href: "/leagues" },
@@ -17,15 +17,40 @@ const mobileItems = [
   { icon: Settings, label: "Settings", href: "/settings" },
 ];
 
+const creatorMobileItems = [
+  { icon: Palette, label: "Creator", href: "/creator" },
+  { icon: Home, label: "Drafts", href: "/creator?status=DRAFT" },
+  { icon: Trophy, label: "Leagues", href: "/leagues" },
+  { icon: User, label: "Profile", href: "/profile" },
+];
+
+const adminMobileItems = [
+  { icon: Shield, label: "Admin", href: "/admin" },
+  { icon: Users, label: "Users", href: "/admin/users" },
+  { icon: BookOpen, label: "Courses", href: "/admin/courses" },
+  { icon: Settings, label: "Settings", href: "/settings" },
+];
+
 export function MobileNav({ className }: { className?: string }) {
   const pathname = usePathname();
   
-  // Cast the hook result to any to bypass Next.js deep type instantiation limits on Prisma.JsonValue
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: profileData } = api.user.getProfile.useQuery(undefined) as any;
-  
-  // Force-cast to simple Record to kill excessive typescript recursion on Prisma.JsonValue
+  const userRole: string = profileData?.role || "STUDENT";
   const avatarConfig = profileData?.studentProfile?.avatarConfig as Record<string, unknown> | undefined;
+
+  const isAdminPath = pathname.startsWith("/admin");
+  const isCreatorPath = pathname.startsWith("/creator");
+
+  let mobileItems = studentMobileItems;
+
+  if (userRole === "DEVELOPER") {
+    if (isAdminPath) mobileItems = adminMobileItems;
+    else if (isCreatorPath) mobileItems = creatorMobileItems;
+  } else if (userRole === "ADMIN") {
+    mobileItems = [...studentMobileItems.slice(0, 3), { icon: Shield, label: "Admin", href: "/admin" }, ...studentMobileItems.slice(3)];
+  } else if (userRole === "COURSE_CREATOR") {
+    mobileItems = [...studentMobileItems.slice(0, 3), { icon: Palette, label: "Creator", href: "/creator" }, ...studentMobileItems.slice(3)];
+  }
 
   return (
     <div className={cn("fixed bottom-0 left-0 right-0 bg-white border-t-2 border-[#E5E5E5] px-1 py-2 z-50 flex justify-between items-center", className)}>

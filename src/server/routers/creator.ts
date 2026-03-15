@@ -8,6 +8,25 @@ export const creatorRouter = createTRPCRouter({
    * Get courses assigned to the current creator.
    */
   getAssignedCourses: creatorProcedure.query(async ({ ctx }) => {
+    // Developer bypass: Show all courses if role is DEVELOPER
+    if (ctx.dbUser.role === "DEVELOPER") {
+      const allCourses = await db.course.findMany({
+        select: {
+          id: true,
+          title: true,
+          slug: true,
+          subtitle: true,
+          status: true,
+          category: true,
+          difficulty: true,
+          createdAt: true,
+          _count: { select: { units: true, lessons: true, enrollments: true } },
+        },
+        orderBy: { createdAt: "desc" },
+      });
+      return allCourses.map(c => ({ ...c, assignedAt: c.createdAt }));
+    }
+
     const assignments = await db.courseCreatorAssignment.findMany({
       where: { creatorUserId: ctx.dbUser.id },
       select: {

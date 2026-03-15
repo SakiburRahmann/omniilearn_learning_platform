@@ -12,7 +12,9 @@ import {
   Sparkles,
   Shield,
   Palette,
-  Code2
+  Code2,
+  Users,
+  BookOpen
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { createClient } from "@/lib/supabase-client";
@@ -26,15 +28,27 @@ interface NavItem {
   roles?: string[];
 }
 
-const navItems: NavItem[] = [
-  { icon: Home, label: "Learn", href: "/dashboard", roles: ["STUDENT", "DEVELOPER"] },
-  { icon: Map, label: "Courses", href: "/courses", roles: ["STUDENT", "DEVELOPER"] },
-  { icon: Trophy, label: "Leaderboards", href: "/leagues", roles: ["STUDENT", "DEVELOPER"] },
-  { icon: Sparkles, label: "Quests", href: "/quests", roles: ["STUDENT", "DEVELOPER"] },
-  { icon: User, label: "Profile", href: "/profile", roles: ["STUDENT", "DEVELOPER"] },
-  { icon: Settings, label: "Settings", href: "/settings", roles: ["STUDENT", "DEVELOPER"] },
-  { icon: Palette, label: "Creator Studio", href: "/creator", roles: ["COURSE_CREATOR"] },
-  { icon: Shield, label: "Admin Panel", href: "/admin", roles: ["ADMIN"] },
+const studentItems: NavItem[] = [
+  { icon: Home, label: "Learn", href: "/dashboard" },
+  { icon: Map, label: "Courses", href: "/courses" },
+  { icon: Trophy, label: "Leaderboards", href: "/leagues" },
+  { icon: Sparkles, label: "Quests", href: "/quests" },
+  { icon: User, label: "Profile", href: "/profile" },
+  { icon: Settings, label: "Settings", href: "/settings" },
+];
+
+const creatorItems: NavItem[] = [
+  { icon: Palette, label: "Creator Studio", href: "/creator" },
+  { icon: Home, label: "Drafts", href: "/creator?status=DRAFT" },
+  { icon: Trophy, label: "Leaderboards", href: "/leagues" }, // Keep for context
+  { icon: User, label: "Profile", href: "/profile" },
+];
+
+const adminItems: NavItem[] = [
+  { icon: Shield, label: "Admin Panel", href: "/admin" },
+  { icon: Users, label: "Manage Users", href: "/admin/users" },
+  { icon: BookOpen, label: "Manage Courses", href: "/admin/courses" },
+  { icon: Settings, label: "Settings", href: "/settings" },
 ];
 
 export function Sidebar({ className }: { className?: string }) {
@@ -42,20 +56,25 @@ export function Sidebar({ className }: { className?: string }) {
   const router = useRouter();
   const supabase = createClient();
   
-  // Cast the hook result to any to bypass Next.js deep type instantiation limits on Prisma.JsonValue
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: profileData } = api.user.getProfile.useQuery(undefined) as any;
-  
   const userRole: string = profileData?.role || "STUDENT";
-  
-  // Force-cast to simple Record to kill excessive typescript recursion on Prisma.JsonValue
   const avatarConfig = (profileData?.studentProfile?.avatarConfig as Record<string, unknown>) || DEFAULT_AVATAR;
 
-  // Filter nav items based on user role
-  const visibleItems = navItems.filter((item) => {
-    if (!item.roles) return true;
-    return item.roles.includes(userRole);
-  });
+  // Determine context based on pathname
+  const isAdminPath = pathname.startsWith("/admin");
+  const isCreatorPath = pathname.startsWith("/creator");
+
+  let visibleItems = studentItems;
+
+  if (userRole === "DEVELOPER") {
+    if (isAdminPath) visibleItems = adminItems;
+    else if (isCreatorPath) visibleItems = creatorItems;
+    else visibleItems = studentItems;
+  } else if (userRole === "ADMIN") {
+    visibleItems = [...studentItems, ...adminItems.filter(i => i.href === "/admin")];
+  } else if (userRole === "COURSE_CREATOR") {
+    visibleItems = [...studentItems, ...creatorItems.filter(i => i.href === "/creator")];
+  }
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
