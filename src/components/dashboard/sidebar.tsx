@@ -35,7 +35,6 @@ const navItems: NavItem[] = [
   { icon: Settings, label: "Settings", href: "/settings", roles: ["STUDENT", "DEVELOPER"] },
   { icon: Palette, label: "Creator Studio", href: "/creator", roles: ["COURSE_CREATOR"] },
   { icon: Shield, label: "Admin Panel", href: "/admin", roles: ["ADMIN"] },
-  { icon: Code2, label: "Developer", href: "/dev", roles: ["DEVELOPER"] },
 ];
 
 export function Sidebar({ className }: { className?: string }) {
