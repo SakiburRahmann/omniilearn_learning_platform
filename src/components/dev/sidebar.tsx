@@ -1,22 +1,20 @@
 "use client";
 
-import { usePathname, useRouter } from "next/navigation";
-import Link from "next/link";
-import { 
-  Activity, 
-  Users, 
-  Terminal, 
-  Settings, 
-  LogOut,
-  ShieldAlert,
-  Database,
-  Eye,
-  BarChart3,
-  Cpu,
-  Monitor
+import {
+  Activity, Users, Terminal, Settings, LogOut,
+  ShieldAlert, Database, Eye, BarChart3, Cpu,
+  Monitor, Shield, Palette, Zap
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { createClient } from "@/lib/supabase-client";
+import { usePathname, useRouter } from "next/navigation";
+import Link from "next/link";
+
+interface SimulationItem {
+  name: string;
+  href: string;
+  icon: any;
+}
 
 interface NavItem {
   icon: React.ComponentType<{ className?: string }>;
@@ -32,6 +30,14 @@ const navItems: NavItem[] = [
   { icon: BarChart3, label: "Platform Analytics", href: "/dev/analytics" },
   { icon: ShieldAlert, label: "System Audit Logs", href: "/dev/logs" },
   { icon: Settings, label: "System Topology", href: "/dev/config" },
+  { icon: Database, label: "Service Catalog", href: "/dev/services" },
+  { icon: Zap, label: "Feature Flags", href: "/dev/flags" },
+];
+
+const simulationItems: SimulationItem[] = [
+  { name: "STUDENT DASHBOARD", href: "/dashboard", icon: Monitor },
+  { name: "ADMIN CONSOLE", href: "/admin", icon: Shield },
+  { name: "CREATOR STUDIO", href: "/creator", icon: Palette },
 ];
 
 export function DevSidebar({ className }: { className?: string }) {
@@ -59,7 +65,7 @@ export function DevSidebar({ className }: { className?: string }) {
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 p-4 space-y-1">
+      <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
         <div className="px-3 mb-2 text-[9px] uppercase font-bold opacity-30 tracking-widest">Management_Cluster</div>
         {navItems.map((item) => {
           const isActive = pathname === item.href;
@@ -81,10 +87,16 @@ export function DevSidebar({ className }: { className?: string }) {
         })}
 
         <div className="px-3 mt-6 mb-2 text-[9px] uppercase font-bold opacity-30 tracking-widest">Simulation_Engines</div>
-        <Link href="/dashboard" className="flex items-center gap-3 px-3 py-2 rounded text-white/50 hover:text-white hover:bg-white/5 transition-all">
-          <Monitor className="w-4 h-4" />
-          <span className="text-[11px] uppercase tracking-wider">Student Dashboard</span>
-        </Link>
+        {simulationItems.map((item) => (
+          <Link 
+            key={item.href}
+            href={item.href} 
+            className="flex items-center gap-3 px-3 py-2 rounded text-white/50 hover:text-white hover:bg-white/5 transition-all group"
+          >
+            <item.icon className="w-4 h-4 group-hover:text-dev-accent" />
+            <span className="text-[11px] uppercase tracking-wider">{item.name}</span>
+          </Link>
+        ))}
       </nav>
 
       {/* Security Checkmark */}

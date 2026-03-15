@@ -7,6 +7,7 @@ import {
   UserPlus, Ban, CheckCircle2, X, Loader2
 } from "lucide-react";
 import { useState } from "react";
+import Link from "next/link";
 
 export default function IdentityManagementPage() {
   const [search, setSearch] = useState("");
@@ -132,17 +133,14 @@ export default function IdentityManagementPage() {
             }} className="space-y-6">
               <div className="space-y-4">
                 <div>
-                  <label className="dev-stat-label block mb-1">Identity Role Authority</label>
-                  <select 
-                    name="role" 
-                    defaultValue={selectedUser.role}
-                    className="w-full bg-black/40 border border-dev-border rounded p-2 font-mono text-xs focus:border-dev-accent outline-none"
-                  >
-                    <option value="STUDENT">STUDENT</option>
-                    <option value="COURSE_CREATOR">COURSE_CREATOR</option>
-                    <option value="ADMIN">ADMIN</option>
-                    <option value="DEVELOPER">DEVELOPER</option>
-                  </select>
+                  <label className="dev-stat-label block mb-1">Identity Role Authority (IMMUTABLE)</label>
+                  <div className="w-full bg-black/20 border border-dev-border/50 rounded p-2 font-mono text-xs opacity-50 flex items-center gap-2">
+                    {selectedUser.role === "DEVELOPER" && <Terminal className="w-3 h-3 text-dev-accent" />}
+                    {selectedUser.role === "ADMIN" && <Shield className="w-3 h-3 text-[#FF9600]" />}
+                    {selectedUser.role === "COURSE_CREATOR" && <Palette className="w-3 h-3 text-[#9B59B6]" />}
+                    {selectedUser.role === "STUDENT" && <GraduationCap className="w-3 h-3 text-[#58CC02]" />}
+                    {selectedUser.role}
+                  </div>
                 </div>
 
                 <div>
@@ -160,7 +158,15 @@ export default function IdentityManagementPage() {
                 </div>
               </div>
 
-              <div className="pt-6 border-t border-dev-border">
+              <div className="pt-6 border-t border-dev-border space-y-3">
+                <Link 
+                  href={`/dev/users/${selectedUser.id}`}
+                  className="dev-card py-3 flex items-center justify-center gap-2 hover:bg-dev-accent/10 border-dev-accent/30 text-dev-accent-light transition-all group"
+                >
+                  <Search className="w-4 h-4 opacity-50 group-hover:opacity-100" />
+                  <span className="font-mono text-[10px] font-bold uppercase tracking-widest">LAUNCH_DEEP_INSPECTION</span>
+                </Link>
+
                 <button 
                   type="submit" 
                   disabled={updateUser.isPending}

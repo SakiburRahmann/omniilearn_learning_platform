@@ -92,55 +92,56 @@ export default function DevPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Operations Hub */}
-        <div>
-          <div className="flex items-center gap-3 mb-4">
-            <Terminal className="w-5 h-5 text-dev-accent" />
-            <h2 className="dev-stat-label">Administrative Operations Hub</h2>
+        <div className="space-y-6">
+          <div>
+            <div className="flex items-center gap-3 mb-4">
+              <Terminal className="w-5 h-5 text-dev-accent" />
+              <h2 className="dev-stat-label">Administrative Operations Hub</h2>
+            </div>
+            <div className="grid grid-cols-1 gap-2">
+              <Link href="/dev/users" className="dev-card hover:bg-white/5 flex items-center justify-between group">
+                <div className="flex items-center gap-4">
+                  <Users className="w-5 h-5 opacity-50 group-hover:text-dev-accent group-hover:opacity-100" />
+                  <div>
+                    <div className="font-bold font-mono text-sm uppercase">Identity Management Engine</div>
+                    <div className="text-[10px] opacity-50">Advanced record override and credential provisioning</div>
+                  </div>
+                </div>
+                <div className="dev-badge dev-badge-active opacity-0 group-hover:opacity-100">ACCESS</div>
+              </Link>
+              
+              <Link href="/dev/actions" className="dev-card hover:bg-white/5 flex items-center justify-between group">
+                <div className="flex items-center gap-4">
+                  <Zap className="w-5 h-5 opacity-50 group-hover:text-dev-accent group-hover:opacity-100" />
+                  <div>
+                    <div className="font-bold font-mono text-sm uppercase">Global Operations Center</div>
+                    <div className="text-[10px] opacity-50">Batch data engineering and platform-wide re-indexing</div>
+                  </div>
+                </div>
+                <div className="dev-badge dev-badge-active opacity-0 group-hover:opacity-100">ACCESS</div>
+              </Link>
+            </div>
           </div>
-          <div className="grid grid-cols-1 gap-2">
-            <Link href="/dev/users" className="dev-card hover:bg-white/5 flex items-center justify-between group">
-              <div className="flex items-center gap-4">
-                <Users className="w-5 h-5 opacity-50 group-hover:text-dev-accent group-hover:opacity-100" />
-                <div>
-                  <div className="font-bold font-mono text-sm uppercase">Identity Management Engine</div>
-                  <div className="text-[10px] opacity-50">Advanced record override and credential provisioning</div>
-                </div>
-              </div>
-              <div className="dev-badge dev-badge-active opacity-0 group-hover:opacity-100">ACCESS</div>
-            </Link>
-            
-            <Link href="/dev/actions" className="dev-card hover:bg-white/5 flex items-center justify-between group">
-              <div className="flex items-center gap-4">
-                <Zap className="w-5 h-5 opacity-50 group-hover:text-dev-accent group-hover:opacity-100" />
-                <div>
-                  <div className="font-bold font-mono text-sm uppercase">Global Operations Center</div>
-                  <div className="text-[10px] opacity-50">Batch data engineering and platform-wide re-indexing</div>
-                </div>
-              </div>
-              <div className="dev-badge dev-badge-active opacity-0 group-hover:opacity-100">ACCESS</div>
-            </Link>
 
-            <Link href="/dashboard" className="dev-card hover:bg-white/5 flex items-center justify-between group">
-              <div className="flex items-center gap-4">
-                <Monitor className="w-5 h-5 opacity-50 group-hover:text-dev-accent group-hover:opacity-100" />
-                <div>
-                  <div className="font-bold font-mono text-sm uppercase">Simulation: Student Experience</div>
-                  <div className="text-[10px] opacity-50">Review platform architecture from student perspective</div>
-                </div>
-              </div>
-              <div className="dev-badge dev-badge-active opacity-0 group-hover:opacity-100">SIMULATE</div>
-            </Link>
-
-            <Link href="/admin" className="dev-card hover:bg-white/5 flex items-center justify-between group">
-              <div className="flex items-center gap-4">
-                <Shield className="w-5 h-5 opacity-50 group-hover:text-dev-accent group-hover:opacity-100" />
-                <div>
-                  <div className="font-bold font-mono text-sm uppercase">Simulation: Admin Console</div>
-                  <div className="text-[10px] opacity-50">Review platform as Site Administrator</div>
-                </div>
-              </div>
-              <div className="dev-badge dev-badge-active opacity-0 group-hover:opacity-100">SIMULATE</div>
-            </Link>
+          <div>
+            <div className="flex items-center gap-3 mb-4">
+              <Monitor className="w-5 h-5 text-dev-accent" />
+              <h2 className="dev-stat-label">Simulation Engines (Experience Testing)</h2>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <Link href="/dashboard" className="dev-card p-4 hover:bg-white/5 transition-all group border-dev-border/50 text-center">
+                <Monitor className="w-5 h-5 text-dev-accent mx-auto mb-2 opacity-50 group-hover:opacity-100" />
+                <div className="font-bold font-mono text-[10px] uppercase">STUDENT_DASH</div>
+              </Link>
+              <Link href="/admin" className="dev-card p-4 hover:bg-white/5 transition-all group border-dev-border/50 text-center">
+                <Shield className="w-5 h-5 text-[#FF9600] mx-auto mb-2 opacity-50 group-hover:opacity-100" />
+                <div className="font-bold font-mono text-[10px] uppercase">ADMIN_CONSOLE</div>
+              </Link>
+              <Link href="/creator" className="dev-card p-4 hover:bg-white/5 transition-all group border-dev-border/50 text-center">
+                <Palette className="w-5 h-5 text-[#9B59B6] mx-auto mb-2 opacity-50 group-hover:opacity-100" />
+                <div className="font-bold font-mono text-[10px] uppercase">CREATOR_STUDIO</div>
+              </Link>
+            </div>
           </div>
         </div>
 
